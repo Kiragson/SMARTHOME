@@ -12,7 +12,7 @@ session_start();
 </head>
 <body>
     <?php include 'template/header.php'; ?>
-    <h1>main</h1>
+    <h1>mains</h1>
     <?php include 'template/footer.php'; ?>
 </body>
 <?php include 'template/script.php'; ?>

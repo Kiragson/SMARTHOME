@@ -51,6 +51,7 @@ if ($result->num_rows > 0) {
         if (!isset($houses[$houseId])) {
             $houses[$houseId] = [
                 'name' => $houseName,
+                'id_house'=>$houseId,
                 'rooms' => [],
             ];
         }
@@ -86,6 +87,12 @@ $conn->close();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
     <script>
         var socket = new WebSocket("ws://localhost:8080");
 
@@ -150,7 +157,24 @@ $conn->close();
             
             <?php foreach ($houses as $houseId => $houseData): ?>
                 <div class='col-8 navbar-light mt-5 p-3 rounded h-100' style='background-color: #e3f2fd;'>
-                    <h3><?php echo $houseData['name']; ?></h3>
+                <div class='row justify-content-center mt-5'>
+                    <div class='col-10'>
+                        <h3><?php echo $houseData['name']; ?></h3>
+                    </div>
+                    <div class="col-1 dropdown">
+                        <button class="btn " role="button" id="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="bi bi-sliders"></i>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>">
+                            <a class="dropdown-item" href="edytuj.php?id_domu=<?php echo $houseData['id_house']; ?>">Edytuj</a>
+
+                            <a class="dropdown-item" href="usun.php?id_domu=<?php echo $houseData['id_house']; ?>">Usuń</a>
+
+                            <a class="dropdown-item" href="#" onclick="pokazInformacje(<?php echo $houseData['id_house']; ?>)">Informacje</a>
+
+                        </div>
+                    </div>
+                </div>
                     <?php foreach ($houseData['rooms'] as $roomId => $roomData): ?>
                         <div class="mt-3 px-5">
                             <h4><?php echo $roomData['name']; ?></h4>
@@ -169,6 +193,7 @@ $conn->close();
                             <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
+                
                 </div>
             <?php endforeach; ?>
             

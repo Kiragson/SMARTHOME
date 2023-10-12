@@ -128,6 +128,10 @@ $conn->close();
             // Wyślij dane na serwer WebSocket
             socket.send(message);
         }
+        function pokazFormularzDodawaniaDomu() {
+            var formularz = document.getElementById("formularz-dodawania-domu");
+            formularz.style.display = "block"; // Pokaż formularz
+        }
     </script>
 </head>
 <body>
@@ -163,12 +167,35 @@ $conn->close();
         </div>
     </div>
     <div class="container mt-2">
-        <div class='row justify-content-center mt-5'>
-            <div class='col-8 btn-container'>
-                <a class="btn btn-light rounded p-3 mb-3" href='#'>Dodaj dom</a>
+        <div class="row justify-content-center mt-5">
+            <div class="col-8 btn-container">
+                <a class="btn btn-light rounded p-3 mb-3" href="#" onclick="pokazFormularzDodawaniaDomu()">Dodaj nowy dom</a>
             </div>
         </div>
     </div>
+    <p>test</p>
+    <div class="container mt-2">
+        <div class="row justify-content-center mt-5">
+            <div class="col-8">
+                <div class="card" id="formularz-dodawania-domu" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title">Dodaj nowy dom</h5>
+                        <form action="dodaj_dom.php" method="post">
+                            <div class="mb-3">
+                                <label for="nazwa_domu" class="form-label">Nazwa domu:</label>
+                                <input type="text" class="form-control" id="nazwa_domu" name="nazwa_domu" required>
+                            </div>
+
+                            <!-- Dodaj inne pola formularza, np. adres, opis itp. -->
+
+                            <button type="submit" class="btn btn-primary">Dodaj Dom</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-2ZR3r5DST6JW6o5Kb8vGwF4L4j4Cz5bsv9S4ts7F5w5qb2LAE6Dfb0BPTw+H5f5F" crossorigin="anonymous"></script>
     <?php include 'template/footer.php'; ?>
 </body>
 <?php include 'template/script.php'; ?>

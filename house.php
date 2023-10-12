@@ -8,13 +8,9 @@ if (!isset($_SESSION['username'])) {
 require_once("connected.php");
 
 // Pobierz zalogowanego użytkownika (zakładamy, że masz mechanizm uwierzytelniania)
-$loggedInUserId = 3; // Przykład - ID zalogowanego użytkownika
+$login = $_SESSION['username'];
 
-// Inicjalizacja zmiennych do przechowywania danych
-$userInfo = "";
-$houses = [];
-
-// Pobierz informacje o użytkowniku i jego domach
+// Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
 $sql = "SELECT u.id, u.login, h.id AS house_id, h.nazwa AS house_name, f.id_admin as id_admin,
         r.id AS room_id, r.name AS room_name,
         d.id AS device_id, d.name AS device_name, d.stan AS device_stan
@@ -23,9 +19,19 @@ $sql = "SELECT u.id, u.login, h.id AS house_id, h.nazwa AS house_name, f.id_admi
         LEFT JOIN house h ON f.id = h.id_family
         LEFT JOIN room r ON h.id = r.id_house
         LEFT JOIN device d ON r.id = d.id_room
-        WHERE u.id = $loggedInUserId";
+        WHERE u.login = ?"; // Zmieniłem na login, możesz dostosować to do Twojej bazy danych
 
-$result = $conn->query($sql);
+// Przygotuj zapytanie SQL
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $login);
+
+// Wykonaj zapytanie SQL
+$stmt->execute();
+$result = $stmt->get_result();
+
+// Inicjalizacja zmiennych do przechowywania danych
+$userInfo = "";
+$houses = [];
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
@@ -68,8 +74,10 @@ if ($result->num_rows > 0) {
     }
 }
 
+$stmt->close();
 $conn->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="pl">
@@ -142,14 +150,14 @@ $conn->close();
             
             <?php foreach ($houses as $houseId => $houseData): ?>
                 <div class='col-8 navbar-light mt-5 p-3 rounded h-100' style='background-color: #e3f2fd;'>
-                    <h3>Nazwa domu: <?php echo $houseData['name']; ?></h3>
+                    <h3><?php echo $houseData['name']; ?></h3>
                     <?php foreach ($houseData['rooms'] as $roomId => $roomData): ?>
                         <div class="mt-3 px-5">
-                            <h4>Nazwa pokoju: <?php echo $roomData['name']; ?></h4>
+                            <h4><?php echo $roomData['name']; ?></h4>
                             <?php if (!empty($roomData['devices'])): ?>
                                 <ul>
                                 <?php foreach ($roomData['devices'] as $deviceData): ?>
-                                    <li>Urządzenie: <?php echo $deviceData['name']; ?> (ID: <?php echo $deviceData['id']; ?>, Stan: <?php echo $deviceData['stan']; ?>)
+                                    <li><?php echo $deviceData['name']; ?> <!--(ID: <?php//echo $deviceData['id']; ?>, Stan: <?php// echo $deviceData['stan']; ?>)-->
                                         <button id="deviceButton_<?php echo $deviceData['id']; ?>" onclick="toggleDevice(<?php echo $deviceData['id']; ?>,<?php echo $deviceData['stan']; ?>)">
                                             <?php echo ($deviceData['stan'] == 1) ? "On" : "Off"; ?>
                                         </button>
@@ -180,7 +188,7 @@ $conn->close();
                 <div class="card" id="formularz-dodawania-domu" style="display: none;">
                     <div class="card-body">
                         <h5 class="card-title">Dodaj nowy dom</h5>
-                        <form action="dodaj_dom.php" method="post">
+                        <form action="ad_home.php" method="post">
                             <div class="mb-3">
                                 <label for="nazwa_domu" class="form-label">Nazwa domu:</label>
                                 <input type="text" class="form-control" id="nazwa_domu" name="nazwa_domu" required>

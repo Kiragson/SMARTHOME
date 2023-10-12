@@ -10,7 +10,7 @@ $login = $_SESSION['username'];
 require_once("connected.php");
 
 // Zapytanie SQL do pobrania danych użytkownika
-$sql = "SELECT imie, nazwisko, email, telefon FROM user WHERE login = '$login'";
+$sql = "SELECT id, imie, nazwisko, email, telefon FROM user WHERE login = '$login'";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {

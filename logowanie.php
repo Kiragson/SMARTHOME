@@ -34,6 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Poprawne logowanie
             $_SESSION['zalogowany'] = true;
             $_SESSION["username"] = $row["login"];
+            $_SESSION["user_id"]=$row["id"];
             header("Location: konto.php");
         } else {
             $error = "Błędne hasło.";

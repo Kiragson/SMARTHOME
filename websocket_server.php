@@ -6,39 +6,62 @@ use Ratchet\ConnectionInterface;
 
 class DeviceControl implements MessageComponentInterface
 {
-    public function onOpen(ConnectionInterface $conn)
-    {
-        // Klient podłączony, nie trzeba podejmować żadnych działań na razie
+    protected $clients;
+
+    public function __construct() {
+        $this->clients = new \SplObjectStorage;
     }
 
-    public function onMessage(ConnectionInterface $from, $msg)
-    {
-    // Obsługa wiadomości od klienta
-    $data = json_decode($msg, true);
-
-    // Zakładamy, że w wiadomości przesyłane są dwa klucze: "device_id" i "state"
-    $device_id = $data['device_id'];
-    $state = $data['state'];
-
-    // Tutaj dodałbyś logikę do zmiany stanu urządzenia
-    // Na przykład, uaktualnij bazę danych lub kontroluj urządzenie fizyczne
-    // Poniżej przedstawiam przykładowe kroki, których należy dokonać
-
-    // Aktualizacja stanu urządzenia w bazie danych
-    updateDeviceStateInDatabase($device_id, $state);
-
-    // Powiadom innych klientów o zmianie stanu
-    broadcastDeviceStateChange($device_id, $state);
+    public function onOpen(ConnectionInterface $conn) {
+        // Dodaj klienta do listy klientów
+        $this->clients->attach($conn);
+        echo "Nowy klient połączony (Adres IP: {$conn->remoteAddress})\n";
     }
 
-    public function onClose(ConnectionInterface $conn)
-    {
-        // Klient rozłączony, można dodać odpowiednią obsługę
+    public function onMessage(ConnectionInterface $from, $msg) {
+        // Obsługa wiadomości od klienta
+        $data = json_decode($msg, true);
+        $device_id = $data['device_id'];
+        $state = $data['state'];
+
+        // Tutaj wywołaj logikę do zmiany stanu urządzenia
+        updateDeviceStateInDatabase($device_id, $state);
+
+        // Przygotuj wiadomość JSON do przesłania
+        $message = json_encode([
+            'success' => true,
+            'device_id' => $device_id,
+        ]);
+
+        // Wyślij wiadomość z potwierdzeniem klientowi
+        $from->send($message);
+
+        // Powiadom innych klientów o zmianie stanu
+        $this->broadcastDeviceStateChange($device_id, $state);
     }
 
-    public function onError(ConnectionInterface $conn, \Exception $e)
-    {
+    public function onClose(ConnectionInterface $conn) {
+        // Klient rozłączony, usuń go z listy klientów
+        $this->clients->detach($conn);
+        echo "Klient rozłączony (Adres IP: {$conn->remoteAddress})\n";
+    }
+
+    public function onError(ConnectionInterface $conn, \Exception $e) {
         // Obsługa błędów po stronie serwera
+        echo "Błąd: {$e->getMessage()}\n";
+    }
+
+    public function broadcastDeviceStateChange($device_id, $new_state) {
+        foreach ($this->clients as $client) {
+            // Przygotuj wiadomość JSON do przesłania
+            $message = json_encode([
+                'device_id' => $device_id,
+                'state' => $new_state,
+            ]);
+
+            // Wyślij wiadomość do klienta
+            $client->send($message);
+        }
     }
 }
 
@@ -53,3 +76,4 @@ $server = IoServer::factory(
 
 $server->run();
 ?>
+

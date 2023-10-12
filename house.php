@@ -79,49 +79,55 @@ $conn->close();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <title>Document</title>
     <script>
+        var socket = new WebSocket("ws://localhost:8080");
+
+        // Obsługa zdarzenia po nawiązaniu połączenia WebSocket
+        socket.onopen = function (event) {
+            console.log("Połączono z serwerem WebSocket.");
+        };
+
+        // Obsługa zdarzenia po otrzymaniu wiadomości od serwera WebSocket
+        socket.onmessage = function (event) {
+            var response = JSON.parse(event.data);
+
+            if (response.success) {
+                // Zaktualizuj stan przycisku na stronie
+                var button = document.getElementById("deviceButton_" + response.device_id);
+                console.log("zmianastanu");
+                if (button.innerHTML === "On") {
+                    button.innerHTML = "Off";
+                } else {
+                    button.innerHTML = "On";
+                }
+            } else {
+                alert("Wystąpił błąd podczas zmiany stanu urządzenia.");
+            }
+        };
+
+        // Obsługa zdarzenia po rozłączeniu z serwerem WebSocket
+        socket.onclose = function (event) {
+            if (event.wasClean) {
+                console.log("Zamknięto połączenie z serwerem WebSocket.");
+            } else {
+                console.error("Nieoczekiwane rozłączenie z serwerem WebSocket.");
+            }
+        };
+
+        // Obsługa zdarzenia błędu
+        socket.onerror = function (error) {
+            console.error("Błąd połączenia z serwerem WebSocket: " + error.message);
+        };
+
         // Funkcja do przełączania stanu urządzenia
-        function toggleDevice(deviceId) {
+        function toggleDevice(deviceId, currentState) {
             console.log("Przycisk kliknięty dla urządzenia o ID: " + deviceId);
 
-            // Pobierz element przycisku
-            var button = document.getElementById("deviceButton_" + deviceId);
+            // Przygotuj dane do wysłania jako JSON
+            var message = JSON.stringify({ device_id: deviceId, state: currentState });
 
-            // Wysyłamy żądanie AJAX, aby zmienić stan urządzenia
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "update_device_state.php", true);
-            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    // Po zakończeniu żądania, zaktualizuj stan przycisku
-                    console.log(xhr.responseText);
-
-                    var response = JSON.parse(xhr.responseText);
-                    console.log(JSON.stringify(response, null, 2));
-                    var currentState = button.innerHTML;
-                    if (response.success) {
-                        // Zaktualizuj stan przycisku na stronie
-                        //alert("Zmiana przycisku");
-                        console.log("zmiana");
-                        if (currentState === "On") {
-                            button.innerHTML = "Off";
-                        } else {
-                            button.innerHTML = "On";
-                        }
-                    } else {
-                        alert("Wystąpił błąd podczas zmiany stanu urządzenia.");
-                    }
-                }
-            };
-
-            // Przygotuj dane do wysłania
-            var data = "device_id=" + deviceId;
-
-            // Wyślij żądanie
-            xhr.send(data);
+            // Wyślij dane na serwer WebSocket
+            socket.send(message);
         }
-
-
-
     </script>
 </head>
 <body>

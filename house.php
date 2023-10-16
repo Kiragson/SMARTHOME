@@ -181,18 +181,26 @@ $conn->close();
                             <?php if (!empty($roomData['devices'])): ?>
                                 <ul>
                                 <?php foreach ($roomData['devices'] as $deviceData): ?>
-                                    <li><?php echo $deviceData['name']; ?> <!--(ID: <?php//echo $deviceData['id']; ?>, Stan: <?php// echo $deviceData['stan']; ?>)-->
+                                    <li><?php echo $deviceData['name']; ?> <!--(ID: <//?php//echo $deviceData['id']; ?>, Stan: <//?php// echo $deviceData['stan']; ?>)-->
                                         <button id="deviceButton_<?php echo $deviceData['id']; ?>" onclick="toggleDevice(<?php echo $deviceData['id']; ?>,<?php echo $deviceData['stan']; ?>)">
                                             <?php echo ($deviceData['stan'] == 1) ? "On" : "Off"; ?>
                                         </button>
                                     </li>
                                 <?php endforeach; ?>
                                 </ul>
+
                             <?php else: ?>
                                 <p>Brak urządzeń w pokoju</p>
+                                
                             <?php endif; ?>
+                            <button id="newDeviceButton" onclick="pokazFormularzDodawaniaDomu()">
+                                Dodaj urządzenie
+                            </button>
                         </div>
                     <?php endforeach; ?>
+                    <button id="newRoomButton" onclick="pokazFormularzDodawaniaDomu()">
+                                Dodaj pokój
+                                </button>
                 
                 </div>
             <?php endforeach; ?>
@@ -204,9 +212,14 @@ $conn->close();
             <div class="col-8 btn-container">
                 <a class="btn btn-light rounded p-3 mb-3" href="#" onclick="pokazFormularzDodawaniaDomu()">Dodaj nowy dom</a>
             </div>
+            <div>
+            <?php if (!empty($message)): ?>
+                <script>alert('$message');</script>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
-    <p>test</p>
+    
     <div class="container mt-2">
         <div class="row justify-content-center mt-5">
             <div class="col-8">

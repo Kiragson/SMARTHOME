@@ -1,7 +1,7 @@
 <?php
 $host = "localhost";
-$DBusername = "admin";
-$DBpassword = "admin";
+$DBusername = "witryna";
+$DBpassword = "Witryna";
 $database = "smarthome";
 
 $conn = new mysqli($host, $DBusername, $DBpassword, $database);

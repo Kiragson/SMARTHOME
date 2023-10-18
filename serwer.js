@@ -54,10 +54,12 @@ function broadcastDeviceStateChange(device_id, new_state) {
     clients.forEach((client) => {
         client.send(message);
     });
+    console.log("broadcast device");
 }
 
 function updateDeviceStateInDatabase(device_id, state) {
-    // Tutaj dodaj logikę do aktualizacji stanu urządzenia w bazie danych
+    //update_device_state.php
+    console.log("update device");
 }
 
 const port = 8080;

@@ -115,7 +115,7 @@ $conn->close();
                     button.innerHTML = "On";
                 }
             } else {
-                alert("Wystąpił błąd podczas zmiany stanu urządzenia. test");
+                console.error("Wystąpił błąd podczas zmiany stanu urządzenia");
             }
         };
 
@@ -142,6 +142,7 @@ $conn->close();
 
             // Wyślij dane na serwer WebSocket
             socket.send(message);
+            console.log("wysyłąnie danych na serwer");
         }
         function pokazFormularzDodawaniaDomu() {
             var formularz = document.getElementById("formularz-dodawania-domu");

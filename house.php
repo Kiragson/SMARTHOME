@@ -108,14 +108,14 @@ $conn->close();
             if (response.success) {
                 // Zaktualizuj stan przycisku na stronie
                 var button = document.getElementById("deviceButton_" + response.device_id);
-                console.log("zmianastanu");
+                console.log("zmiana stanu");
                 if (button.innerHTML === "On") {
                     button.innerHTML = "Off";
                 } else {
                     button.innerHTML = "On";
                 }
             } else {
-                alert("Wystąpił błąd podczas zmiany stanu urządzenia.");
+                alert("Wystąpił błąd podczas zmiany stanu urządzenia. test");
             }
         };
 

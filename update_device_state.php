@@ -10,7 +10,10 @@ require_once("connected.php");
 
 // $conn odzwierciedla połączenie z bazą
 function updateDeviceStateInDatabase($conn, $deviceId) {
-    // Pobierz bieżący stan urządzenia z bazy danych
+    //echo("Komunikacja serwer(php) "+$deviceId);
+    if(isset($deviceId))
+    {
+        // Pobierz bieżący stan urządzenia z bazy danych
     $sql = "SELECT stan FROM device WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $deviceId);
@@ -32,15 +35,21 @@ function updateDeviceStateInDatabase($conn, $deviceId) {
     if ($stmt->execute()) {
         // Zaktualizowano stan urządzenia pomyślnie
         $response['success'] = true;
-        $response['message'] = "Stan urządzenia został zaktualizowany.";
+        $response['message'] = "update_device_state.php: Stan urządzenia został zaktualizowany.";
         $response['newDeviceState'] = $newDeviceState; // Nowy stan urządzenia
     } else {
         // Błąd podczas aktualizacji stanu urządzenia
         $response['success'] = false;
-        $response['message'] = "Błąd podczas aktualizacji stanu urządzenia: " . $stmt->error;
+        $response['message'] = "update_device_state.php: Błąd podczas aktualizacji stanu urządzenia : " . $stmt->error;
     }
 
     $stmt->close();
+    }
+    else {
+        $response['success'] = false;
+        $response['message'] = "update_device_state.php:  Zmienna deviceId jest pusta";
+    }
+    
 }
 
 // Zakończ połączenie z bazą danych

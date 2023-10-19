@@ -1,82 +1,82 @@
 <?php
-session_start();
-if (!isset($_SESSION['username'])) {
-    // Użytkownik nie jest zalogowany, przekieruj go na stronę logowania lub gdzie indziej.
-    header('Location: login.php');
-    exit;
-}
-require_once("connected.php");
+    session_start();
+    if (!isset($_SESSION['username'])) {
+        // Użytkownik nie jest zalogowany, przekieruj go na stronę logowania lub gdzie indziej.
+        header('Location: login.php');
+        exit;
+    }
+    require_once("connected.php");
 
-// Pobierz zalogowanego użytkownika (zakładamy, że masz mechanizm uwierzytelniania)
-$login = $_SESSION['username'];
+    // Pobierz zalogowanego użytkownika (zakładamy, że masz mechanizm uwierzytelniania)
+    $login = $_SESSION['username'];
 
-// Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
-$sql = "SELECT u.id, u.login, h.id AS house_id, h.nazwa AS house_name, f.id_admin as id_admin,
-        r.id AS room_id, r.name AS room_name,
-        d.id AS device_id, d.name AS device_name, d.stan AS device_stan
-        FROM user u
-        LEFT JOIN family f ON u.id = f.id_user1 OR u.id = f.id_user2 OR u.id = f.id_user3 OR u.id = f.id_user4 OR u.id = f.id_user5 OR u.id = f.id_user6 
-        LEFT JOIN house h ON f.id = h.id_family
-        LEFT JOIN room r ON h.id = r.id_house
-        LEFT JOIN device d ON r.id = d.id_room
-        WHERE u.login = ?"; // Zmieniłem na login, możesz dostosować to do Twojej bazy danych
+    // Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
+    $sql = "SELECT u.id, u.login, h.id AS house_id, h.nazwa AS house_name, f.id_admin as id_admin,
+            r.id AS room_id, r.name AS room_name,
+            d.id AS device_id, d.name AS device_name, d.stan AS device_stan
+            FROM user u
+            LEFT JOIN family f ON u.id = f.id_user1 OR u.id = f.id_user2 OR u.id = f.id_user3 OR u.id = f.id_user4 OR u.id = f.id_user5 OR u.id = f.id_user6 
+            LEFT JOIN house h ON f.id = h.id_family
+            LEFT JOIN room r ON h.id = r.id_house
+            LEFT JOIN device d ON r.id = d.id_room
+            WHERE u.login = ?"; // Zmieniłem na login, możesz dostosować to do Twojej bazy danych
 
-// Przygotuj zapytanie SQL
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $login);
+    // Przygotuj zapytanie SQL
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("s", $login);
 
-// Wykonaj zapytanie SQL
-$stmt->execute();
-$result = $stmt->get_result();
+    // Wykonaj zapytanie SQL
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-// Inicjalizacja zmiennych do przechowywania danych
-$userInfo = "";
-$houses = [];
+    // Inicjalizacja zmiennych do przechowywania danych
+    $userInfo = "";
+    $houses = [];
 
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $userId = $row['id'];
-        $userName = $row['login'];
-        $houseId = $row['house_id'];
-        $houseName = $row['house_name'];
-        $idAdmin = $row['id_admin'];
-        $roomName = $row['room_name'];
-        $roomId = $row['room_id'];
-        $deviceName = $row['device_name'];
-        $deviceId = $row['device_id'];
-        $deviceStan = $row['device_stan'];
-        $isAdmin = ($userId == $idAdmin);
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $userId = $row['id'];
+            $userName = $row['login'];
+            $houseId = $row['house_id'];
+            $houseName = $row['house_name'];
+            $idAdmin = $row['id_admin'];
+            $roomName = $row['room_name'];
+            $roomId = $row['room_id'];
+            $deviceName = $row['device_name'];
+            $deviceId = $row['device_id'];
+            $deviceStan = $row['device_stan'];
+            $isAdmin = ($userId == $idAdmin);
 
-        // Jeśli to jest nowy dom, utwórz nową strukturę domu
-        if (!isset($houses[$houseId])) {
-            $houses[$houseId] = [
-                'name' => $houseName,
-                'id_house'=>$houseId,
-                'rooms' => [],
-            ];
-        }
+            // Jeśli to jest nowy dom, utwórz nową strukturę domu
+            if (!isset($houses[$houseId])) {
+                $houses[$houseId] = [
+                    'name' => $houseName,
+                    'id_house'=>$houseId,
+                    'rooms' => [],
+                ];
+            }
 
-        // Jeśli to jest nowy pokój w domu, utwórz nową strukturę pokoju
-        if ($roomName && !isset($houses[$houseId]['rooms'][$roomId])) {
-            $houses[$houseId]['rooms'][$roomId] = [
-                'name' => $roomName,
-                'devices' => [],
-            ];
-        }
+            // Jeśli to jest nowy pokój w domu, utwórz nową strukturę pokoju
+            if ($roomName && !isset($houses[$houseId]['rooms'][$roomId])) {
+                $houses[$houseId]['rooms'][$roomId] = [
+                    'name' => $roomName,
+                    'devices' => [],
+                ];
+            }
 
-        // Jeśli to jest nowe urządzenie w pokoju, dodaj je do listy urządzeń
-        if ($deviceName) {
-            $houses[$houseId]['rooms'][$roomId]['devices'][] = [
-                'name' => $deviceName,
-                'id' => $deviceId,
-                'stan' => $deviceStan,
-            ];
+            // Jeśli to jest nowe urządzenie w pokoju, dodaj je do listy urządzeń
+            if ($deviceName) {
+                $houses[$houseId]['rooms'][$roomId]['devices'][] = [
+                    'name' => $deviceName,
+                    'id' => $deviceId,
+                    'stan' => $deviceStan,
+                ];
+            }
         }
     }
-}
 
-$stmt->close();
-$conn->close();
+    $stmt->close();
+    $conn->close();
 ?>
 
 

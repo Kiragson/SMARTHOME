@@ -11,27 +11,33 @@ wss.on('connection', (ws) => {
     console.log(`Nowy klient połączony (Adres IP: ${ws._socket.remoteAddress})`);
 
     // Obsługa wiadomości od klienta
-    ws.on('message', (message) => {
-        
+    ws.on('message', async (message) => {
         const data = JSON.parse(message);
         const device_id = data.device_id;
         const state = data.state;
-
-        // Tutaj wywołaj logikę do zmiany stanu urządzenia
-        updateDeviceStateInDatabase(device_id, state);
-
-        // Przygotuj wiadomość JSON do przesłania
-        const response = JSON.stringify({
-            success: true,
-            device_id: device_id,
-        });
-
-        // Wyślij wiadomość z potwierdzeniem klientowi
-        ws.send(response);
-
-        // Powiadom innych klientów o zmianie stanu
-        broadcastDeviceStateChange(device_id, state);
+    
+        try {
+            // Wywołaj logikę do zmiany stanu urządzenia
+            updateDeviceStateInDatabase(device_id);
+    
+            // Przygotuj wiadomość JSON do przesłania
+            const response = JSON.stringify({
+                success: true,
+                device_id: device_id,
+            });
+    
+            // Wyślij wiadomość z potwierdzeniem klientowi
+            ws.send(response);
+    
+            // Powiadom innych klientów o zmianie stanu
+            broadcastDeviceStateChange(device_id, state);
+        } catch (error) {
+            // Obsłuż błąd z funkcji updateDeviceStateInDatabase
+            console.error("Serwer.js: Wystąpił błąd - " + error.message);
+            // Tutaj możesz obsłużyć błąd lub wyświetlić komunikat użytkownikowi
+        }
     });
+    
 
     ws.on('close', () => {
         // Klient rozłączony, usuń go z listy klientów
@@ -46,6 +52,7 @@ wss.on('connection', (ws) => {
 });
 
 function broadcastDeviceStateChange(device_id, new_state) {
+    console.log("Serwer.js broadcast device");
     const message = JSON.stringify({
         device_id: device_id,
         state: new_state,
@@ -55,7 +62,7 @@ function broadcastDeviceStateChange(device_id, new_state) {
     clients.forEach((client) => {
         client.send(message);
     });
-    console.log("broadcast device");
+    
 }
 
 const axios = require('axios');
@@ -66,15 +73,17 @@ function updateDeviceStateInDatabase(device_id) {
         device_id: device_id,
     };
 
+    const jsonData = JSON.stringify(data);
+
     // Wyślij żądanie HTTP POST, aby odczytać i zmienić stan urządzenia
-    axios.post('http://localhost/studia/SMARTHOME/update_device_state.php', data)
+    axios.post('http://localhost/studia/SMARTHOME/update_device_state.php', jsonData)
         .then(response => {
             // Obsługa odpowiedzi od skryptu PHP
             const responseData = response.data;
 
             if (responseData.success) {
                 // Zaktualizowano stan urządzenia pomyślnie
-                console.log("Stan urządzenia został zaktualizowany pomyślnie.");
+                console.log("Serwer.js: Stan urządzenia został zaktualizowany pomyślnie.");
                 // Tutaj możesz podjąć dodatkowe działania w przypadku sukcesu
 
                 // Przykład: Zaktualizowanie tekstu przycisku
@@ -91,20 +100,28 @@ function updateDeviceStateInDatabase(device_id) {
                 switch_device(responseData.newDeviceState, responseData.ip_address);
             } else {
                 // Błąd podczas aktualizacji stanu urządzenia
-                console.error("Błąd podczas aktualizacji stanu urządzenia: " + responseData.message);
-                console.log(responseData);
+                console.error("Serwer.js updateDeviceStateInDatabase(): Błąd podczas aktualizacji stanu urządzenia: " + responseData.message);
                 // Tutaj możesz obsłużyć błąd lub wyświetlić komunikat użytkownikowi
+                // Dodaj obsługę błędu
+                handleError(responseData.message);
             }
         })
         .catch(error => {
-            console.error("Błąd podczas wysyłania żądania HTTP: " + error.message);
+            console.error("Serwer.js updateDeviceStateInDatabase(): Błąd podczas wysyłania żądania HTTP:" + error.message);
             // Tutaj obsłuż błąd sieci lub inny błąd żądania HTTP
+            // Dodaj obsługę błędu
+            handleError(error.message);
+            return error;
         });
 }
 function switch_device(stan, ip_address){
     console.log(stan+" "+ip_address);
 }
-
+function handleError(errorMessage) {
+    // Tutaj możesz wykonać odpowiednie działania w przypadku błędu
+    console.error("Serwer.js Obsługa błedu: Wystąpił błąd - " + errorMessage);
+    // Na przykład, wyświetlenie komunikatu o błędzie użytkownikowi lub inną obsługę błędu.
+}
 
 
 

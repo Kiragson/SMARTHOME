@@ -10,8 +10,9 @@ wss.on('connection', (ws) => {
     clients.add(ws);
     console.log(`Nowy klient połączony (Adres IP: ${ws._socket.remoteAddress})`);
 
+    // Obsługa wiadomości od klienta
     ws.on('message', (message) => {
-        // Obsługa wiadomości od klienta
+        
         const data = JSON.parse(message);
         const device_id = data.device_id;
         const state = data.state;
@@ -37,9 +38,9 @@ wss.on('connection', (ws) => {
         clients.delete(ws);
         console.log(`Klient rozłączony (Adres IP: ${ws._socket.remoteAddress})`);
     });
-
+    // Obsługa błędów po stronie serwera
     ws.on('error', (error) => {
-        // Obsługa błędów po stronie serwera
+        
         console.error(`Błąd: ${error.message}`);
     });
 });
@@ -57,10 +58,55 @@ function broadcastDeviceStateChange(device_id, new_state) {
     console.log("broadcast device");
 }
 
-function updateDeviceStateInDatabase(device_id, state) {
-    //update_device_state.php
-    console.log("update device");
+const axios = require('axios');
+
+function updateDeviceStateInDatabase(device_id) {
+    // Przygotuj dane do wysłania na serwer
+    const data = {
+        device_id: device_id,
+    };
+
+    // Wyślij żądanie HTTP POST, aby odczytać i zmienić stan urządzenia
+    axios.post('http://localhost/studia/SMARTHOME/update_device_state.php', data)
+        .then(response => {
+            // Obsługa odpowiedzi od skryptu PHP
+            const responseData = response.data;
+
+            if (responseData.success) {
+                // Zaktualizowano stan urządzenia pomyślnie
+                console.log("Stan urządzenia został zaktualizowany pomyślnie.");
+                // Tutaj możesz podjąć dodatkowe działania w przypadku sukcesu
+
+                // Przykład: Zaktualizowanie tekstu przycisku
+                var buttonElement = document.getElementById("deviceButton_" + device_id);
+                if (buttonElement) {
+                    if (responseData.newDeviceState === 1) {
+                        buttonElement.innerHTML = "Off";
+                    } else {
+                        buttonElement.innerHTML = "On";
+                    }
+                }
+
+                // Uruchom funkcję 'switch' z danymi z bazy
+                switch_device(responseData.newDeviceState, responseData.ip_address);
+            } else {
+                // Błąd podczas aktualizacji stanu urządzenia
+                console.error("Błąd podczas aktualizacji stanu urządzenia: " + responseData.message);
+                console.log(responseData);
+                // Tutaj możesz obsłużyć błąd lub wyświetlić komunikat użytkownikowi
+            }
+        })
+        .catch(error => {
+            console.error("Błąd podczas wysyłania żądania HTTP: " + error.message);
+            // Tutaj obsłuż błąd sieci lub inny błąd żądania HTTP
+        });
 }
+function switch_device(stan, ip_address){
+    console.log(stan+" "+ip_address);
+}
+
+
+
 
 const port = 8080;
 server.listen(port, () => {

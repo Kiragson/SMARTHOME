@@ -8,12 +8,14 @@ $response = array();
 // Połącz się z bazą danych
 require_once("connected.php");
 
+// $conn odzwierciedla połączenie z bazą
 function updateDeviceStateInDatabase($conn, $deviceId) {
     // Pobierz bieżący stan urządzenia z bazy danych
     $sql = "SELECT stan FROM device WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $deviceId);
     $stmt->execute();
+    $currentDeviceState=0;
     $stmt->bind_result($currentDeviceState);
     $stmt->fetch();
     $stmt->close();
@@ -35,7 +37,7 @@ function updateDeviceStateInDatabase($conn, $deviceId) {
     } else {
         // Błąd podczas aktualizacji stanu urządzenia
         $response['success'] = false;
-        $response['message'] = "Błąd podczas aktualizacji stanu urządzenia: " . $conn->error;
+        $response['message'] = "Błąd podczas aktualizacji stanu urządzenia: " . $stmt->error;
     }
 
     $stmt->close();

@@ -10,7 +10,7 @@ $login = $_SESSION['username'];
 require_once("connected.php");
 
 // Zapytanie SQL do pobrania danych użytkownika
-$sql = "SELECT id, imie, nazwisko, email, telefon FROM user WHERE login = '$login'";
+$sql = "SELECT id, imie, nazwisko, email, telefon, Role as ranga FROM user WHERE login = '$login'";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
@@ -21,6 +21,7 @@ if ($result->num_rows > 0) {
     $email = $row['email'] ?? '---';
     $telefon = $row['telefon'] ?? '---';
     $id=$row['id'];
+    $ranga= $row['ranga'] ??'2';
 }
 
 $conn->close();

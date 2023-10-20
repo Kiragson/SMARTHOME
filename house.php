@@ -7,6 +7,16 @@
     }
     require_once("connected.php");
 
+    if (isset($_GET['error'])) {
+        $errorMessage = urldecode($_GET['error']);
+        echo "<script>alert('$errorMessage');</script>";
+        
+        // Usuń parametr 'error' z adresu URL
+        $url = strtok($_SERVER["REQUEST_URI"], '?');
+        header('Location: ' . $url);
+        exit;
+    }
+    
     // Pobierz zalogowanego użytkownika (zakładamy, że masz mechanizm uwierzytelniania)
     $login = $_SESSION['username'];
 
@@ -88,19 +98,7 @@
     <?php include 'template/script.php'; ?>
 </head>
 <body>
-    <script>
-    var stan = 0;
-    function button() {
-        if (stan == 0) {
-            var el2 = document.getElementById('przycisk');
-            el2.innerHTML = 'OFF';
-        } else {
-            var el2 = document.getElementById('przycisk');
-            el2.innerHTML = 'On';
-        }
-    }
-    window.addEventListener('load', button)
-    </script>
+    
     <?php include 'template/header.php'; ?>
     <div id="przycisk">
         
@@ -109,7 +107,7 @@
         <?php echo $userInfo; ?>
         <div class='row justify-content-center mt-5'>
             <?php foreach ($houses as $houseId => $houseData): ?>
-                <div class='col-8 navbar-light mt-5 p-3 rounded h-100' style='background-color: #e3f2fd;'>
+                <div class='col-8 navbar-light mt-5 p-3 rounded border border-3 h-100' style='background-color: #e3f2fd;'>
                     <div class='row justify-content-center mt-5'>
                         <div class='col-10'>
                             <h3><?php echo $houseData['name']; ?></h3>
@@ -126,15 +124,31 @@
                         </div>
                     </div>
                     <?php foreach ($houseData['rooms'] as $roomId => $roomData): ?>
-                        <div class="mt-3 px-5">
-                            <h4><?php echo $roomData['name']; ?></h4>
+                        <div class="mt-3 px-5 py-2 rounded border border-3">
+                            <div class='row  mt-2'>
+                                <div class="col-3 ml-5 row">
+                                    <h4><?php echo $roomData['name']; ?></h4>
+                                </div>
+                                <div class="col-3 ml-5 row"></div>
+                                <div class="col-3 ml-5 row">
+                                    <form action="new_device.php" method="POST">
+                                        <?php //echo $houseId ?>
+                                        <input type="hidden" name="id_house" value="<?php echo $houseId; ?>">
+                                        <?php //echo $roomId ?>
+                                        <button class="btn btn-primary p-2" type="submit">Dodaj urządzenia</button>
+                                    </form>
+                                    
+
+                                </div>
+                            </div>
+                            
                             <?php if (!empty($roomData['devices'])): ?>
                                 <ul>
                                     <?php foreach ($roomData['devices'] as $deviceData): ?>
                                         <li>
                                             <?php echo $deviceData['name']; ?>
                                             <button id="deviceButton_<?php echo $deviceData['id']; ?>" onclick="toggleDeviceState(<?php echo $deviceData['id']; ?>)">
-                                                Loading... <!-- Tekst zostanie zaktualizowany dynamicznie -->
+                                                <?php echo ($deviceData['stan'] == 1) ? "On" : "Off"; ?>
                                             </button>
                                         </li>
                                     <?php endforeach; ?>
@@ -142,14 +156,14 @@
                             <?php else: ?>
                                 <p>Brak urządzeń w pokoju</p>
                             <?php endif; ?>
-                            <button id="newDeviceButton" onclick="pokazFormularzDodawaniaDomu()">
-                                Dodaj urządzenie
-                            </button>
+                            
                         </div>
                     <?php endforeach; ?>
-                    <button id="newRoomButton" onclick="pokazFormularzDodawaniaDomu()">
-                        Dodaj pokój
-                    </button>
+                    <div class='row justify-content-center mt-4'>
+                        <div class="col-4 justify-content-center row">
+                            <a class="btn btn-primary p-2" href="new_room.php">Dodaj pokój</a>
+                        </div>
+                    </div>
                 </div>
             <?php endforeach; ?>
         </div>

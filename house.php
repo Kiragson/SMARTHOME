@@ -78,7 +78,6 @@
     $stmt->close();
     $conn->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="pl">
 <head>
@@ -90,18 +89,15 @@
 </head>
 <body>
     <script>
-    var stan =0;
-    function button(){
-        if(stan==0){
+    var stan = 0;
+    function button() {
+        if (stan == 0) {
             var el2 = document.getElementById('przycisk');
-            el2.innerHTML = 'OFF'
-        }
-        else{
+            el2.innerHTML = 'OFF';
+        } else {
             var el2 = document.getElementById('przycisk');
-            el2.innerHTML = 'On'
+            el2.innerHTML = 'On';
         }
-        
-
     }
     window.addEventListener('load', button)
     </script>
@@ -204,7 +200,7 @@
         if (response.success) {
             // Zaktualizuj stan przycisku na stronie
             var button = document.getElementById("deviceButton_" + response.device_id);
-            console.log("zmiana stanu");
+            console.log("Zmiana stanu");
             if (button.innerHTML === "On") {
                 button.innerHTML = "Off";
             } else {
@@ -238,7 +234,7 @@
 
         // Wyślij dane na serwer WebSocket
         socket.send(message);
-        console.log("wysyłąnie danych na serwer");
+        console.log("Wysyłanie danych na serwer");
     }
 
     // Funkcja do pobierania i aktualizacji stanu urządzenia
@@ -250,10 +246,13 @@
                 // Aktualizacja tekstu przycisku i wywołanie funkcji do przełączania stanu
                 const buttonElement = document.getElementById('deviceButton_' + device_id);
                 if (buttonElement) {
-                    if (data.state === 1) {
+                    if (data.state === 0) {
                         buttonElement.innerHTML = "Off";
-                    } else {
+                    } else if (data.state === 1){
                         buttonElement.innerHTML = "On";
+                    }
+                    else{
+                        console.error("Hoise.php: Błędny stan przycisku")
                     }
 
                     // Wywołanie funkcji do przełączania stanu z aktualnym stanem
@@ -265,7 +264,6 @@
                 console.error('Błąd podczas pobierania stanu urządzenia: ' + error.message);
             });
     }
-    
     </script>
     <?php include 'template/footer.php'; ?>
 </body>

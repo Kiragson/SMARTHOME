@@ -5,14 +5,18 @@ session_start();
 // Inicjalizacja tablicy do przechowywania odpowiedzi
 $response = array();
 
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
 // Połącz się z bazą danych
 require_once("connected.php");
 
-// $conn odzwierciedla połączenie z bazą
-function updateDeviceStateInDatabase($conn, $deviceId) {
-    //echo("Komunikacja serwer(php) "+$deviceId);
-    if(isset($deviceId))
-    {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $deviceId = $_POST['device_id'];
+    error_log($deviceId);
+}
+if(isset($deviceId))
+{
         // Pobierz bieżący stan urządzenia z bazy danych
     $sql = "SELECT stan FROM device WHERE id = ?";
     $stmt = $conn->prepare($sql);
@@ -36,27 +40,29 @@ function updateDeviceStateInDatabase($conn, $deviceId) {
         // Zaktualizowano stan urządzenia pomyślnie
         $response['success'] = true;
         $response['message'] = "update_device_state.php: Stan urządzenia został zaktualizowany.";
-        $response['newDeviceState'] = $newDeviceState; // Nowy stan urządzenia
+        //$response['newDeviceState'] = $newDeviceState; // Nowy stan urządzenia
     } else {
         // Błąd podczas aktualizacji stanu urządzenia
         $response['success'] = false;
         $response['message'] = "update_device_state.php: Błąd podczas aktualizacji stanu urządzenia : " . $stmt->error;
     }
-
+    error_log("Skrypt PHP działa");
     $stmt->close();
-    }
-    else {
-        $response['success'] = false;
-        $response['message'] = "update_device_state.php:  Zmienna deviceId jest pusta";
-    }
-    
 }
+else {
+    $response['success'] = false;
+    $response['message'] = "update_device_state.php:  Zmienna deviceId jest pusta";
+    error_log("Skrypt PHP nie działa, Zmienna deviceId jest pusta");
+
+}
+    
+
 
 // Zakończ połączenie z bazą danych
 $conn->close();
 
 // Ustaw nagłówki odpowiedzi JSON
-header('Content-Type: application/json');
+//header('Content-Type: application/json');
 
 // Zwróć odpowiedź jako JSON
 echo json_encode($response);

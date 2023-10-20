@@ -69,17 +69,25 @@ const axios = require('axios');
 
 function updateDeviceStateInDatabase(device_id) {
     // Przygotuj dane do wysłania na serwer
-    const data = {
-        device_id: device_id,
-    };
-
-    const jsonData = JSON.stringify(data);
+    
+    
 
     // Wyślij żądanie HTTP POST, aby odczytać i zmienić stan urządzenia
-    axios.post('http://localhost/studia/SMARTHOME/update_device_state.php', jsonData)
-        .then(response => {
+    //console.log(device_id);
+    //var Sdevice_id=String(device_id);
+    //console.log(Sdevice_id);
+    //axios.post('http://localhost/studia/SMARTHOME/update_device_state.php', Sdevice_id)
+    var deviceid= new FormData();
+    deviceid.append("device_id",device_id);
+
+    fetch('http://localhost/studia/SMARTHOME/update_device_state.php', {
+        method: 'POST',
+        body: deviceid
+      })
+        .then(response => response.json())
+        .then(responseData => {
             // Obsługa odpowiedzi od skryptu PHP
-            const responseData = response.data;
+            //const responseData = response.data;
 
             if (responseData.success) {
                 // Zaktualizowano stan urządzenia pomyślnie
@@ -87,17 +95,22 @@ function updateDeviceStateInDatabase(device_id) {
                 // Tutaj możesz podjąć dodatkowe działania w przypadku sukcesu
 
                 // Przykład: Zaktualizowanie tekstu przycisku
-                var buttonElement = document.getElementById("deviceButton_" + device_id);
-                if (buttonElement) {
-                    if (responseData.newDeviceState === 1) {
-                        buttonElement.innerHTML = "Off";
-                    } else {
-                        buttonElement.innerHTML = "On";
+                if (typeof document !== 'undefined') {
+                    var buttonElement = document.getElementById("deviceButton_" + device_id);
+                    if (buttonElement) {
+                        if (responseData.newDeviceState === 1) {
+                            buttonElement.innerHTML = "Off";
+                        } else {
+                            buttonElement.innerHTML = "On";
+                        }
+                        console.log("Serwer.js system działa poprawnie");
                     }
+                }else{
+                    console.log('Ten kod jest wykonywany poza środowiskiem przeglądarki.');
                 }
 
                 // Uruchom funkcję 'switch' z danymi z bazy
-                switch_device(responseData.newDeviceState, responseData.ip_address);
+                //switch_device(responseData.newDeviceState, responseData.ip_address);
             } else {
                 // Błąd podczas aktualizacji stanu urządzenia
                 console.error("Serwer.js updateDeviceStateInDatabase(): Błąd podczas aktualizacji stanu urządzenia: " + responseData.message);
@@ -107,20 +120,23 @@ function updateDeviceStateInDatabase(device_id) {
             }
         })
         .catch(error => {
-            console.error("Serwer.js updateDeviceStateInDatabase(): Błąd podczas wysyłania żądania HTTP:" + error.message);
-            // Tutaj obsłuż błąd sieci lub inny błąd żądania HTTP
-            // Dodaj obsługę błędu
-            handleError(error.message);
-            return error;
-        });
+            if (error && error.message) {
+                //Tutaj obsłuż błąd sieci lub inny błąd żądania HTTP
+                console.error("Serwer.js updateDeviceStateInDatabase(): Błąd podczas wysyłania żądania HTTP:" + error.message);
+                handleError(error.message);
+
+                //return error;
+            }else {
+                console.error("Serwer.js updateDeviceStateInDatabase(): Błąd - obiekt błędu jest niezdefiniowany lub nie zawiera właściwości 'message'");
+            }
+         });
 }
 function switch_device(stan, ip_address){
     console.log(stan+" "+ip_address);
 }
 function handleError(errorMessage) {
-    // Tutaj możesz wykonać odpowiednie działania w przypadku błędu
-    console.error("Serwer.js Obsługa błedu: Wystąpił błąd - " + errorMessage);
-    // Na przykład, wyświetlenie komunikatu o błędzie użytkownikowi lub inną obsługę błędu.
+    // Informacja o błedzie
+    //console.error("Serwer.js Obsługa błedu: Wystąpił błąd - " + errorMessage);
 }
 
 

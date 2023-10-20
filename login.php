@@ -15,7 +15,7 @@
         <div class="row justify-content-center mt-5">
             <div class="col-8 navbar-light p-5 rounded h-100" style="background-color: #e3f2fd;">
                 <h2>Formularz Logowania</h2>
-                <form method="post" action="logowanie.php" id="login-form">
+                <form method="post" action="php_script/logowanie.php" id="login-form">
                     <div class="mb-3">
                         <label for="exampleInputEmail1" class="form-label">Login:</label>
                         <input type="text" class="form-control" id="login" name="login" placeholder="Login lub Email" aria-describedby="emailHelp">

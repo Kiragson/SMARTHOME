@@ -183,7 +183,7 @@
     <div class="container mt-2">
         <div class="row justify-content-center mt-5">
             <div class="col-8">
-                <div class="card" id="formularz-dodawania-domu" style="display: none;">
+                <div class="card" id="formularz-dodawania-domu" >
                     <div class="card-body">
                         <h5 class="card-title">Dodaj nowy dom</h5>
                         <form action="ad_home.php" method="post">

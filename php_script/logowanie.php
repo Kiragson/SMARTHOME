@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once("connected.php");
+require_once("../connected.php");
 
 // Funkcja do sprawdzania, czy tekst zawiera skrypty
 function contains_script($text) {
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     } else {
         $error = "Błędny login lub email.";
-        header("Location: login.php?error=" . urlencode($error));
+        header("Location: ../login.php?error=" . urlencode($error));
     }
     
 }

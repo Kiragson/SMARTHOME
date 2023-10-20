@@ -80,7 +80,7 @@ function updateDeviceStateInDatabase(device_id) {
     var deviceid= new FormData();
     deviceid.append("device_id",device_id);
 
-    fetch('http://localhost/studia/SMARTHOME/update_device_state.php', {
+    fetch('http://localhost/studia/SMARTHOME/php_script/update_device_state.php', {
         method: 'POST',
         body: deviceid
       })

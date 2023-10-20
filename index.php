@@ -8,11 +8,11 @@ function detectDeviceType() {
     if ($width <= 0){
         if (!isset($_SESSION['username'])) {
             // Użytkownik nie jest zalogowany, przekieruj go na stronę logowania lub gdzie indziej.
-            header('Location: login.php');
+            header('Location: http://localhost/studia/SMARTHOME/strony/login.php');
             exit;
         }
         else{
-            header('Location: house.php');
+            header('Location: http://localhost/studia/SMARTHOME/strony/house.php');
             exit;
         }
     }
@@ -20,21 +20,21 @@ function detectDeviceType() {
         echo ($width);
         if (!isset($_SESSION['username'])) {
             // Użytkownik nie jest zalogowany, przekieruj go na stronę logowania lub gdzie indziej.
-            //header('Location: mlogin.php');
+            //header('Location: http://localhost/studia/SMARTHOME/mobile/login.php');
             exit;
         }
         else{
-            //header('Location: mhouse.php');
+            //header('Location: http://localhost/studia/SMARTHOME/mobile/house.php');
             exit;
         }
     } else {
         if (!isset($_SESSION['username'])) {
             // Użytkownik nie jest zalogowany, przekieruj go na stronę logowania lub gdzie indziej.
-            header('Location: login.php');
+            header('Location: http://localhost/studia/SMARTHOME/strony/login.php');
             exit;
         }
         else{
-            header('Location: house.php');
+            header('Location: http://localhost/studia/SMARTHOME/strony/house.php');
             exit;
         }
     }

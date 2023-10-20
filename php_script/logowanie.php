@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once("../connected.php");
+require_once("connected.php");
 
 // Funkcja do sprawdzania, czy tekst zawiera skrypty
 function contains_script($text) {
@@ -35,13 +35,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['zalogowany'] = true;
             $_SESSION["username"] = $row["login"];
             $_SESSION["user_id"]=$row["id"];
-            header("Location: konto.php");
+            header("Location: http://localhost/studia/SMARTHOME/strony/konto.php");
         } else {
             $error = "Błędne hasło.";
         }
     } else {
         $error = "Błędny login lub email.";
-        header("Location: ../login.php?error=" . urlencode($error));
+        header("Location: http://localhost/studia/SMARTHOME/strony/login.php?error=" . urlencode($error));
     }
     
 }

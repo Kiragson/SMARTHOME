@@ -3,17 +3,18 @@ session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     require_once("../connected.php"); // Importuj plik z połączeniem do bazy danych
-
+    var_dump($_POST);
     // Pobierz dane z formularza
-    $imie = $_POST["imie"];
-    $nazwisko = $_POST["nazwisko"];
-    $email = $_POST["email"];
-    $telefon = $_POST["telefon"];
+    $imie = $_POST['first_name'] ;
+    $nazwisko = $_POST['last_name'] ;
+    $email = $_POST['email'] ;
+    $telefon = $_POST['phone_number'] ;
     $username = $_POST["username"];
 
+
     // Zaktualizuj dane w bazie danych
-    $update_query = "UPDATE user SET imie = '$imie', nazwisko = '$nazwisko', email = '$email', telefon = '$telefon' WHERE login = '$username'";
-    
+    $update_query = "UPDATE user SET first_name = '$imie', last_name = '$nazwisko', email = '$email', phone_number = '$telefon' WHERE login = '$username'";
+
     if ($conn->query($update_query) === TRUE) {
         // Aktualizacja danych zakończona sukcesem
         $_SESSION["success_message"] = "Dane użytkownika zostały zaktualizowane.";

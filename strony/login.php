@@ -15,7 +15,7 @@
         <div class="row justify-content-center mt-5">
             <div class="col-8 navbar-light p-5 rounded h-100" style="background-color: #e3f2fd;">
                 <h2>Formularz Logowania</h2>
-                <form method="post" action="http://localhost/studia/SMARTHOME/php_script/logowanie.php" id="login-form">
+                <form method="post" action="../php_script/logowanie.php" id="login-form">
                     <div class="mb-3">
                         <label for="exampleInputEmail1" class="form-label">Login:</label>
                         <input type="text" class="form-control" id="login" name="login" placeholder="Login lub Email" aria-describedby="emailHelp">
@@ -31,16 +31,16 @@
                     <button class="btn btn-warning rounded p-2  w-100 mb-3" type="submit" id="login-button">Zaloguj</button>
                     <a class="btn btn-light rounded p-2 mb-3 w-100" href="register.php">Rejestracja</a>
                     <div id="error-message" class="text-danger" role="alert">
-                    <?php
-                    if (!empty($_GET["error"])) {
-                        echo '<div class="alert alert-danger error" role="alert">' . htmlspecialchars($_GET["error"]) . '</div>';
-                    }
-                    ?>
+                        <?php
+                            if (!empty($_GET["error"])) {
+                                echo '<div class="alert alert-danger error" role="alert">' . htmlspecialchars($_GET["error"]) . '</div>';
+                            }
+                        ?>
                     </div>
                 </form>
                 <div class="mb-3">
                     <div class="text-end">
-                    <a class="" href="#" style="background-color: #e3f2fd;">Nie pamietam hasła</a>
+                        <a href="#" style="background-color: #e3f2fd;">Nie pamietam hasła</a>
                     </div>
                 
                 </div>

@@ -10,18 +10,18 @@ $login = $_SESSION['username'];
 require_once("../connected.php");
 
 // Zapytanie SQL do pobrania danych użytkownika
-$sql = "SELECT id, imie, nazwisko, email, telefon, Role as ranga FROM user WHERE login = '$login'";
+$sql = "SELECT id, first_name, last_name, email, phone_number, rank FROM user WHERE login = '$login'";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     // Dane użytkownika zostały znalezione
     $row = $result->fetch_assoc();
-    $imie = $row['imie'] ?? '---';
-    $nazwisko = $row['nazwisko'] ?? '---';
+    $imie = $row['first_name'] ?? '---';
+    $nazwisko = $row['last_name'] ?? '---';
     $email = $row['email'] ?? '---';
-    $telefon = $row['telefon'] ?? '---';
+    $telefon = $row['phone_number'] ?? '---';
     $id=$row['id'];
-    $ranga= $row['ranga'] ??'2';
+    $ranga= $row['rank'] ??'2';
 }
 
 $conn->close();
@@ -38,7 +38,7 @@ $conn->close();
     <title>Document</title>
 </head>
 <body>
-    <?php include 'http://localhost/studia/SMARTHOME/template/header.php'; ?>
+    <?php include '../template/header.php'; ?>
     <div class="container">
         <div class="row justify-content-center mt-5 ">
             <div class="col-8 navbar-light p-5 rounded h-100" style="background-color: #e3f2fd;">
@@ -59,8 +59,8 @@ $conn->close();
             </div>
         </div>
     </div>
-    <?php include 'http://localhost/studia/SMARTHOME/template/footer.php'; ?>
+    <?php include '../template/footer.php'; ?>
 </body>
 
-<?php include 'http://localhost/studia/SMARTHOME/template/script.php'; ?>
+<?php include '../template/script.php'; ?>
 </html>

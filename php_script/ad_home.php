@@ -16,7 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Przygotuj zapytanie SQL, aby dodać nowy dom
         
 
-        $insertFamilySql = "INSERT INTO family (id_admin,id_user1) VALUES (?,?)";
+        $insertFamilySql = "INSERT INTO family (id_admin,user1) VALUES (?,?)";
         $stmt = $conn->prepare($insertFamilySql);
         $stmt->bind_param("ii", $user_id,$user_id);
 
@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $lastInsertedFamilyId = $conn->insert_id;
 
             // Utwórz rodzinę z id_admin ustawionym na id_domu
-            $insertDomSql = "INSERT INTO house (nazwa, id_family) VALUES (?, ?)";
+            $insertDomSql = "INSERT INTO house (name, family_id) VALUES (?, ?)";
             $stmt = $conn->prepare($insertDomSql);
             $stmt->bind_param("si", $nazwa_domu, $lastInsertedFamilyId);
             

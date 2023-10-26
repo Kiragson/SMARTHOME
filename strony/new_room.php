@@ -11,8 +11,8 @@ require_once("../connected.php");
 $username = $_SESSION['username'];
 $user_id=$_SESSION['user_id'];
 $domes = [];
-$sql = "SELECT house.id, house.nazwa FROM house
-        JOIN family ON house.id_family = family.id
+$sql = "SELECT house.id, house.name FROM house
+        JOIN family ON house.family_id = family.id
         WHERE family.id_admin = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $user_id);
@@ -79,8 +79,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nowy pokój</title>
-    <?php include 'http://localhost/studia/SMARTHOME/template/css.php'; ?>
-    <?php include 'http://localhost/studia/SMARTHOME/template/script.php'; ?>
+    <?php include '../template/css.php'; ?>
+    <?php include '../template/script.php'; ?>
 </head>
 <body>
     <div class="container">

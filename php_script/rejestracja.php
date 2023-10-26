@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $haslo_hashed = password_hash($haslo, PASSWORD_DEFAULT);
 
                     // Zapytanie SQL do dodania użytkownika do bazy danych
-                    $insert_query = "INSERT INTO user (email, password) VALUES ('$email', '$haslo_hashed')";
+                    $insert_query = "INSERT INTO user (email, password, rank) VALUES ('$email', '$haslo_hashed','2')";
 
                     if ($conn->query($insert_query) === TRUE) {
                         $_SESSION["username"] = $email; // Poprawienie przypisania do sesji

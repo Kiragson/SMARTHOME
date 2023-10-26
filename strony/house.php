@@ -21,15 +21,16 @@
     $login = $_SESSION['username'];
 
     // Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
-    $sql = "SELECT u.id, u.login, h.id AS house_id, h.nazwa AS house_name, f.id_admin as id_admin,
-            r.id AS room_id, r.name AS room_name,
-            d.id AS device_id, d.name AS device_name, d.stan AS device_stan
-            FROM user u
-            LEFT JOIN family f ON u.id = f.id_user1 OR u.id = f.id_user2 OR u.id = f.id_user3 OR u.id = f.id_user4 OR u.id = f.id_user5 OR u.id = f.id_user6 
-            LEFT JOIN house h ON f.id = h.id_family
-            LEFT JOIN room r ON h.id = r.id_house
-            LEFT JOIN device d ON r.id = d.id_room
-            WHERE u.login = ?"; // Zmieniłem na login, możesz dostosować to do Twojej bazy danych
+    $sql = "SELECT u.id, u.login, h.id AS house_id, h.name AS house_name, f.id_admin AS id_admin,
+        r.id AS room_id, r.name AS room_name,
+        d.id AS device_id, d.name AS device_name, d.state AS device_stan
+        FROM User u
+        LEFT JOIN Family f ON u.id = f.admin_user1 OR u.id = f.admin_user2 OR u.id = f.admin_user3 OR u.id = f.admin_user4 OR u.id = f.admin_user5 OR u.id = f.admin_user6 
+        LEFT JOIN House h ON f.id = h.family_id
+        LEFT JOIN Room r ON h.id = r.house_id
+        LEFT JOIN Device d ON r.id = d.room_id
+        WHERE u.login = ?";
+
 
     // Przygotuj zapytanie SQL
     $stmt = $conn->prepare($sql);
@@ -94,12 +95,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <?php include 'http://localhost/studia/SMARTHOME/template/css.php'; ?>
+    <?php include '../template/css.php'; ?>
     
 </head>
 <body>
     
-    <?php include 'http://localhost/studia/SMARTHOME/template/header.php'; ?>
+    <?php include '../template/header.php'; ?>
     
     <div class="container">
         <?php echo $userInfo; ?>
@@ -184,7 +185,7 @@
                 <div class="card" id="formularz-dodawania-domu" >
                     <div class="card-body">
                         <h5 class="card-title">Dodaj nowy dom</h5>
-                        <form action="http://localhost/studia/SMARTHOME/strony/ad_home.php" method="post">
+                        <form action="http://localhost/studia/SMARTHOME/php_script/ad_home.php" method="post">
                             <div class="mb-3">
                                 <label for="nazwa_domu" class="form-label">Nazwa domu:</label>
                                 <input type="text" class="form-control" id="nazwa_domu" name="nazwa_domu" required>
@@ -279,7 +280,7 @@
     }
     </script>
     
-    <?php include 'http://localhost/studia/SMARTHOME/template/script.php'; ?>
-    <?php include 'http://localhost/studia/SMARTHOME/template/footer.php'; ?>
+    <?php include '../template/script.php'; ?>
+    <?php include '../template/footer.php'; ?>
 </body>
 </html>

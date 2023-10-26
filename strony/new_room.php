@@ -5,7 +5,7 @@ if (!isset($_SESSION['username'])) {
     header('Location: http://localhost/studia/SMARTHOME/strony/login.php');
     exit;
 }
-require_once("connected.php");
+require_once("../connected.php");
 
 // Pobierz listę domów użytkownika
 $username = $_SESSION['username'];

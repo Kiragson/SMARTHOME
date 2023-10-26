@@ -9,7 +9,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 // Połącz się z bazą danych
-require_once("connected.php");
+require_once("../connected.php");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $deviceId = $_POST['device_id'];

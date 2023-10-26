@@ -2,7 +2,7 @@
 session_start();
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    require_once("connected.php"); // Importuj plik z połączeniem do bazy danych
+    require_once("../connected.php"); // Importuj plik z połączeniem do bazy danych
 
     // Pobierz dane z formularza
     $imie = $_POST["imie"];

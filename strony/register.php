@@ -23,7 +23,12 @@ session_start();
                     </div>
                     <div class="mb-3">
                         <label for="inputPassword5" class="form-label">Password:</label>
-                        <input type="password" id="haslo" class="form-control" name="haslo" aria-describedby="passwordHelpBlock" placeholder="Password">
+                        <div class="input-group">
+                            <input type="password" id="password" class="form-control" name="password" aria-describedby="passwordHelpBlock" placeholder="Password">
+                            <button type="button" id="showPassword" class="btn btn-light">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                         <div id="passwordHelpBlock" class="form-text">
                             Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters, or emoji.
                         </div>
@@ -45,9 +50,19 @@ session_start();
     </div>
 
     <script>
+        const passwordInput = document.getElementById("haslo");
+        const showPasswordButton = document.getElementById("showPassword");
+
+        showPasswordButton.addEventListener("click", function () {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+            } else {
+                passwordInput.type = "password";
+            }
+        });
         document.getElementById("registration-form").addEventListener("submit", function(event) {
             const email = document.getElementById("email").value;
-            const haslo = document.getElementById("haslo").value;
+            const haslo = document.getElementById("password").value;
 
             if (!validateEmail(email) || !validatePassword(haslo)) {
                 event.preventDefault(); // Zatrzymaj wysyłanie formularza

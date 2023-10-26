@@ -5,7 +5,7 @@ if (isset($_GET['id_domu'])) {
     $id_domu = $_GET['id_domu'];
 
     // Połączenie z bazą danych (zakładam, że masz już skonfigurowane połączenie)
-    require_once("connected.php");
+    require_once("../connected.php");
 
     // Rozpocznij transakcję
     $conn->begin_transaction();

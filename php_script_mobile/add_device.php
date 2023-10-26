@@ -7,7 +7,7 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-require_once("connected.php");
+require_once("../connected.php");
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Pobieramy dane z formularza

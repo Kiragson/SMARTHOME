@@ -7,7 +7,7 @@ $response = array();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Upewnij się, że użytkownik jest zalogowany
     if (isset($_SESSION['username'])) {
-        require_once("connected.php"); // Zaimportuj połączenie do bazy danych
+        require_once("../connected.php"); // Zaimportuj połączenie do bazy danych
 
         $nazwa_domu = $_POST['nazwa_domu'];
         $login = $_SESSION['username'];

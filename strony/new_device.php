@@ -5,7 +5,7 @@ if (!isset($_SESSION['username'])) {
     header('Location: login.php');
     exit;
 }
-require_once("connected.php");
+require_once("../connected.php");
 if (isset($_GET['error'])) {
     $errorMessage = urldecode($_GET['error']);
     echo "<script>alert('$errorMessage');</script>";

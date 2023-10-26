@@ -1,5 +1,5 @@
 <?php
-require_once("connected.php");
+require_once("../connected.php");
 
 // Funkcja do sprawdzania, czy hasło spełnia warunki
 function is_password_valid($password) {
@@ -18,12 +18,17 @@ function is_password_valid($password) {
 
 // Obsługa formularza rejestracji
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST["email"];
-    $haslo = $_POST["haslo"];
+    if (empty($_POST["email"]) || empty($_POST["password"])) {
+        $error_message = "Proszę wypełnić wszystkie pola.";
+    }else{
+        $email = $_POST["email"];
+        $haslo = $_POST["password"];
+    }
+    
 
     // Sprawdzenie, czy email i hasło zostały wpisane
     if (empty($email) || empty($haslo)) {
-        $error_message = "Proszę wypełnić wszystkie pola.";
+        $error_message = "Proszę wypełnić wszystkie pola. Wprowadzono hasło: $haslo email: $email";
     } else {
         // Zabezpiecz dane przed SQL Injection i filtrowaniem skryptów
         $email = mysqli_real_escape_string($conn, $email);
@@ -48,7 +53,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $haslo_hashed = password_hash($haslo, PASSWORD_DEFAULT);
 
                     // Zapytanie SQL do dodania użytkownika do bazy danych
-                    $insert_query = "INSERT INTO user (email, haslo) VALUES ('$email', '$haslo_hashed')";
+                    $insert_query = "INSERT INTO user (email, password) VALUES ('$email', '$haslo_hashed')";
 
                     if ($conn->query($insert_query) === TRUE) {
                         $_SESSION["username"] = $email; // Poprawienie przypisania do sesji

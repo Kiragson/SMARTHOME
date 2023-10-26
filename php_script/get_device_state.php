@@ -1,6 +1,6 @@
 <?php
 // Połączenie z bazą danych (jeśli jest używane)
-require_once("connected.php"); // Zakładam, że "connected.php" zawiera kod do nawiązania połączenia z bazą danych
+require_once("../connected.php"); // Zakładam, że "connected.php" zawiera kod do nawiązania połączenia z bazą danych
 
 // Odczytaj parametr device_id z zapytania
 $device_id = isset($_GET['device_id']) ? intval($_GET['device_id']) : null;

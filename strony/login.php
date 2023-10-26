@@ -23,7 +23,7 @@
                     </div>
                     <div class="mb-3">
                         <label for="inputPassword5" class="form-label">Password:</label>
-                        <input type="password" id="haslo" name="haslo" placeholder="Hasło" class="form-control" aria-describedby="passwordHelpBlock">
+                        <input type="password" id="password" name="password" placeholder="Hasło" class="form-control" aria-describedby="passwordHelpBlock">
                         <div id="passwordHelpBlock" class="form-text">
                             Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters, or emoji.
                         </div>
@@ -51,7 +51,7 @@
     <script>
         document.getElementById("login-form").addEventListener("submit", function(event) {
             const login = document.getElementById("login").value;
-            const haslo = document.getElementById("haslo").value;
+            const haslo = document.getElementById("password").value;
             const errorMessage = document.getElementById("error-message");
 
             if (login.trim() === "" || haslo.trim() === "") {

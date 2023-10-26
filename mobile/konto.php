@@ -7,7 +7,7 @@ if (!isset($_SESSION['username'])) {
 }
 $login = $_SESSION['username'];
 
-require_once("connected.php");
+require_once("../connected.php");
 
 // Zapytanie SQL do pobrania danych użytkownika
 $sql = "SELECT id, imie, nazwisko, email, telefon, Role as ranga FROM user WHERE login = '$login'";

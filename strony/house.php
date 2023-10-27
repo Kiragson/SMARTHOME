@@ -10,10 +10,6 @@
     if (isset($_GET['error'])) {
         $errorMessage = urldecode($_GET['error']);
         echo "<script>alert('$errorMessage');</script>";
-        
-        // Usuń parametr 'error' z adresu URL
-        $url = strtok($_SERVER["REQUEST_URI"], '?');
-        header('Location: ' . $url);
         exit;
     }
     
@@ -21,7 +17,9 @@
     $login = $_SESSION['username'];
 
     // Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
-    $sql = "SELECT u.id, u.login, u.number_of_houses AS NOH, h.id AS house_id, h.name AS house_name, f.id_admin AS id_admin,
+    $sql = "SELECT u.id, u.login, u.number_of_houses AS NOH, 
+        h.id AS house_id, h.name AS house_name, 
+        f.id_admin AS id_admin,
         r.id AS room_id, r.name AS room_name,
         d.id AS device_id, d.name AS device_name, d.state AS device_stan
         FROM User u
@@ -58,7 +56,7 @@
             $deviceStan = $row['device_stan'];
             $isAdmin = ($userId == $idAdmin);
             $numberHouse= $row['NOH'];
-
+            // Jeśli urzytkownik ma domy
             if(!isset($numberHouse)){
                 $numberHouse=0;
             }
@@ -70,7 +68,6 @@
                     'rooms' => [],
                 ];
             }
-
             // Jeśli to jest nowy pokój w domu, utwórz nową strukturę pokoju
             if ($roomName && !isset($houses[$houseId]['rooms'][$roomId])) {
                 $houses[$houseId]['rooms'][$roomId] = [
@@ -78,7 +75,6 @@
                     'devices' => [],
                 ];
             }
-
             // Jeśli to jest nowe urządzenie w pokoju, dodaj je do listy urządzeń
             if ($deviceName) {
                 $houses[$houseId]['rooms'][$roomId]['devices'][] = [
@@ -100,12 +96,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Twoje domy</title>
     <?php include '../template/css.php'; ?>
-    
 </head>
 <body>
-    
     <?php include '../template/header.php'; ?>
-    
     <div class="container">
         <?php echo $userInfo; ?>
         <div class='row justify-content-center mt-5'>
@@ -196,87 +189,86 @@
         </div>
     <?php endif; ?>
     <script>
-    var socket = new WebSocket("ws://localhost:8080");
+        var socket = new WebSocket("ws://localhost:8080");
 
-    // Obsługa zdarzenia po nawiązaniu połączenia WebSocket
-    socket.onopen = function (event) {
-        console.log("Połączono z serwerem WebSocket.");
-    };
+        // Obsługa zdarzenia po nawiązaniu połączenia WebSocket
+        socket.onopen = function (event) {
+            console.log("Połączono z serwerem WebSocket.");
+        };
 
-    // Obsługa zdarzenia po otrzymaniu wiadomości od serwera WebSocket
-    socket.onmessage = function (event) {
-        var response = JSON.parse(event.data);
+        // Obsługa zdarzenia po otrzymaniu wiadomości od serwera WebSocket
+        socket.onmessage = function (event) {
+            var response = JSON.parse(event.data);
 
-        if (response.success) {
-            // Zaktualizuj stan przycisku na stronie
-            var button = document.getElementById("deviceButton_" + response.device_id);
-            console.log("Zmiana stanu");
-            if (button.innerHTML === "On") {
-                button.innerHTML = "Off";
-            } else {
-                button.innerHTML = "On";
-            }
-        } else {
-            console.error("Wystąpił błąd podczas zmiany stanu urządzenia");
-        }
-    };
-
-    // Obsługa zdarzenia po rozłączeniu z serwerem WebSocket
-    socket.onclose = function (event) {
-        if (event.wasClean) {
-            console.log("Zamknięto połączenie z serwerem WebSocket.");
-        } else {
-            console.error("Nieoczekiwane rozłączenie z serwerem WebSocket.");
-        }
-    };
-
-    // Obsługa zdarzenia błędu
-    socket.onerror = function (error) {
-        console.error("Błąd połączenia z serwerem WebSocket: " + error.message);
-    };
-
-    // Funkcja do przełączania stanu urządzenia
-    function toggleDevice(deviceId, currentState) {
-        console.log("Przycisk kliknięty dla urządzenia o ID: " + deviceId);
-
-        // Przygotuj dane do wysłania jako JSON
-        var message = JSON.stringify({ device_id: deviceId, state: currentState });
-
-        // Wyślij dane na serwer WebSocket
-        socket.send(message);
-        console.log("Wysyłanie danych na serwer");
-    }
-
-    // Funkcja do pobierania i aktualizacji stanu urządzenia
-    function toggleDeviceState(device_id) {
-        // Wysyłanie zapytania do serwera w celu pobrania stanu urządzenia
-        fetch('http://localhost/studia/SMARTHOME/php_script/get_device_state.php?device_id=' + device_id)
-            .then(response => response.json())
-            .then(data => {
-                // Aktualizacja tekstu przycisku i wywołanie funkcji do przełączania stanu
-                const buttonElement = document.getElementById('deviceButton_' + device_id);
-                if (buttonElement) {
-                    console.log("Zmiana Stanu");
-                    if (data.state === 0) {
-                        buttonElement.innerHTML = "Off";
-                    } else if (data.state === 1){
-                        buttonElement.innerHTML = "On";
-                    }
-                    else{
-                        console.error("Hoise.php: Błędny stan przycisku")
-                    }
-
-                    // Wywołanie funkcji do przełączania stanu z aktualnym stanem
-                    toggleDevice(device_id, data.state);
+            if (response.success) {
+                // Zaktualizuj stan przycisku na stronie
+                var button = document.getElementById("deviceButton_" + response.device_id);
+                console.log("Zmiana stanu");
+                if (button.innerHTML === "On") {
+                    button.innerHTML = "Off";
+                } else {
+                    button.innerHTML = "On";
                 }
-                console.log('deviceButton_' + device_id+" "+data.state);
-            })
-            .catch(error => {
-                console.error('Błąd podczas pobierania stanu urządzenia: ' + error.message);
-            });
-    }
+            } else {
+                console.error("Wystąpił błąd podczas zmiany stanu urządzenia");
+            }
+        };
+
+        // Obsługa zdarzenia po rozłączeniu z serwerem WebSocket
+        socket.onclose = function (event) {
+            if (event.wasClean) {
+                console.log("Zamknięto połączenie z serwerem WebSocket.");
+            } else {
+                console.error("Nieoczekiwane rozłączenie z serwerem WebSocket.");
+            }
+        };
+
+        // Obsługa zdarzenia błędu
+        socket.onerror = function (error) {
+            console.error("Błąd połączenia z serwerem WebSocket: " + error.message);
+        };
+
+        // Funkcja do przełączania stanu urządzenia
+        function toggleDevice(deviceId, currentState) {
+            console.log("Przycisk kliknięty dla urządzenia o ID: " + deviceId);
+
+            // Przygotuj dane do wysłania jako JSON
+            var message = JSON.stringify({ device_id: deviceId, state: currentState });
+
+            // Wyślij dane na serwer WebSocket
+            socket.send(message);
+            console.log("Wysyłanie danych na serwer");
+        }
+
+        // Funkcja do pobierania i aktualizacji stanu urządzenia
+        function toggleDeviceState(device_id) {
+            // Wysyłanie zapytania do serwera w celu pobrania stanu urządzenia
+            fetch('http://localhost/studia/SMARTHOME/php_script/get_device_state.php?device_id=' + device_id)
+                .then(response => response.json())
+                .then(data => {
+                    // Aktualizacja tekstu przycisku i wywołanie funkcji do przełączania stanu
+                    const buttonElement = document.getElementById('deviceButton_' + device_id);
+                    if (buttonElement) {
+                        console.log("Zmiana Stanu");
+                        if (data.state === 0) {
+                            buttonElement.innerHTML = "Off";
+                        } else if (data.state === 1){
+                            buttonElement.innerHTML = "On";
+                        }
+                        else{
+                            console.error("Hoise.php: Błędny stan przycisku")
+                        }
+
+                        // Wywołanie funkcji do przełączania stanu z aktualnym stanem
+                        toggleDevice(device_id, data.state);
+                    }
+                    console.log('deviceButton_' + device_id+" "+data.state);
+                })
+                .catch(error => {
+                    console.error('Błąd podczas pobierania stanu urządzenia: ' + error.message);
+                });
+        }
     </script>
-    
     <?php include '../template/script.php'; ?>
 </body>
 </html>

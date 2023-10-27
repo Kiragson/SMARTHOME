@@ -45,7 +45,7 @@ $conn->close();
                 <div class="mb-3">
                     <h3>Nowy Dom</h3>
                 </div>
-                <form action="ad_house.php" method="POST" id="ad_house-form">
+                <form action="../php_script/ad_home.php" method="POST" id="ad_house-form">
                     <div class='row justify-content-center mt-5'>
                         <div class="mb-3">
                             <label for="room_name" class="form-label">Nazwa domu</label>

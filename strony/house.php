@@ -28,8 +28,6 @@
         LEFT JOIN Room r ON h.id = r.house_id
         LEFT JOIN Device d ON r.id = d.room_id
         WHERE u.login = ?";
-
-
     // Przygotuj zapytanie SQL
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("s", $login);
@@ -104,20 +102,18 @@
         <div class='row justify-content-center mt-5'>
             <?php foreach ($houses as $houseId => $houseData): ?>
                 <?php if ($numberHouse>0): ?>
-                    <?php print_r($numberHouse); 
-                    ?>
                     <div class='col-8 navbar-light mt-5 p-3 rounded border border-3 h-100' style='background-color: #e3f2fd;'>
                         <div class='row justify-content-center mt-5'>
                             <div class='col-10'>
                                 <h3><?php echo $houseData['name']; ?></h3>
                             </div>
                             <div class="col-1 dropdown">
-                                <button class="btn" role="button" id="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <button class="btn" type="button" id="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-sliders"></i>
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>">
                                     <a class="dropdown-item" href="edytuj.php?id_domu=<?php echo $houseData['id_house']; ?>">Edytuj</a>
-                                    <a class="dropdown-item" href="usun.php?id_domu=<?php echo $houseData['id_house']; ?>">Usuń</a>
+                                    <a class="dropdown-item" href="../php_script/usun.php?id_domu=<?php echo $houseData['id_house']; ?>">Usuń</a>
                                     <a class="dropdown-item" href="#" onclick="pokazInformacje(<?php echo $houseData['id_house']; ?>)">Informacje</a>
                                 </div>
                             </div>
@@ -131,16 +127,11 @@
                                     <div class="col-3 ml-5 row"></div>
                                     <div class="col-3 ml-5 row">
                                         <form action="http://localhost/studia/SMARTHOME/strony/new_device.php" method="POST">
-                                            <?php //echo $houseId ?>
                                             <input type="hidden" name="id_house" value="<?php echo $houseId; ?>">
-                                            <?php //echo $roomId ?>
                                             <button class="btn btn-primary p-2" type="submit">Dodaj urządzenia</button>
                                         </form>
-                                        
-
                                     </div>
                                 </div>
-                                
                                 <?php if (!empty($roomData['devices'])): ?>
                                     <ul>
                                         <?php foreach ($roomData['devices'] as $deviceData): ?>
@@ -155,7 +146,6 @@
                                 <?php else: ?>
                                     <p>Brak urządzeń w pokoju</p>
                                 <?php endif; ?>
-                                
                             </div>
                         <?php endforeach; ?>
                         <div class='row justify-content-center mt-4'>
@@ -269,6 +259,6 @@
                 });
         }
     </script>
-    <?php include '../template/script.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>

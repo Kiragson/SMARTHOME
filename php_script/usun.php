@@ -12,27 +12,27 @@ if (isset($_GET['id_domu'])) {
 
     try {
         // Usuń rekordy w odwrotnej kolejności: urządzenia, pokoje, rodzina, a następnie dom
-        $sql_delete_urzadzenia = "DELETE FROM device WHERE id_room IN (SELECT id FROM room WHERE id_house = ?)";
+        $sql_delete_urzadzenia = "DELETE FROM device WHERE room_id IN (SELECT id FROM room WHERE house_id = ?)";
         $stmt_delete_urzadzenia = $conn->prepare($sql_delete_urzadzenia);
         $stmt_delete_urzadzenia->bind_param("i", $id_domu);
         $stmt_delete_urzadzenia->execute();
         $deletedUrzadzenia = $stmt_delete_urzadzenia->affected_rows;
 
-        $sql_delete_room = "DELETE FROM room WHERE id_house = ?";
+        $sql_delete_room = "DELETE FROM room WHERE house_id = ?";
         $stmt_delete_room = $conn->prepare($sql_delete_room);
         $stmt_delete_room->bind_param("i", $id_domu);
         $stmt_delete_room->execute();
         $deletedRoom = $stmt_delete_room->affected_rows;
 
         // Usuń powiązaną rodzinę
-        $sql_select_family = "SELECT id_family FROM house WHERE id = ?";
+        $sql_select_family = "SELECT family_id FROM house WHERE id = ?";
         $stmt_select_family = $conn->prepare($sql_select_family);
         $stmt_select_family->bind_param("i", $id_domu);
         $stmt_select_family->execute();
         $result_select_family = $stmt_select_family->get_result();
 
         if ($row_family = $result_select_family->fetch_assoc()) {
-            $family_id = $row_family['id_family'];
+            $family_id = $row_family['family_id'];
 
             // Usuń rodzinę
             $sql_delete_family = "DELETE FROM family WHERE id = ?";
@@ -61,6 +61,10 @@ if (isset($_GET['id_domu'])) {
         $response['success'] = true;
         $response['message'] = "Operacja zakończona pomyślnie. Usunięto dom, pokoje, urządzenia i rodzinę.";
 
+        // Po wykonaniu operacji przekieruj użytkownika z powrotem na poprzednią stronę
+        header("Location: {$_SERVER['HTTP_REFERER']}");
+        exit;
+
     } catch (Exception $e) {
         // W razie błędu cofnij transakcję
         $conn->rollback();
@@ -75,5 +79,5 @@ if (isset($_GET['id_domu'])) {
 
 // Wyślij odpowiedź JSON
 header('Content-Type: application/json');
-echo json_encode($response);
+//echo json_encode($response);
 ?>

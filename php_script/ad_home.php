@@ -33,12 +33,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $insertDomSql = "INSERT INTO house (name, family_id) VALUES (?, ?)";
             $stmt = $conn->prepare($insertDomSql);
             $stmt->bind_param("si", $nazwa_domu, $lastInsertedFamilyId);
-            
+            $lastInsertedDomId=$conn->insert_id;
 
             if ($stmt->execute()) {
                 // Dodano rodzinę pomyślnie
                 $response['family_success'] = true;
                 $response['family_message'] = "Utworzono dom dla rodziny z id_domu: $lastInsertedDomId";
+
+                $alteruser_housenumber = "SELECT number_of_houses FROM user WHERE id = $user_id";
+                $result = $conn->query($alteruser_housenumber);
+
+                if ($result) {
+                    $row = $result->fetch_assoc();
+                    $currentHouseNumber = $row['number_of_houses'];
+
+                    // Inkrementujemy numer domu o 1
+                    $newHouseNumber = $currentHouseNumber + 1;
+                    $alteruser = "UPDATE user SET number_of_houses = $newHouseNumber WHERE id = $user_id";
+
+                    // Wykonujemy zapytanie do aktualizacji numeru domu użytkownika w bazie danych
+                    $updateResult = $conn->query($alteruser);
+
+                }
+
                 header('Location: http://localhost/studia/SMARTHOME/strony/house.php'); // Zakładam, że masz stronę o nazwie "house.php" z listą domów.
                 exit;
             } else {

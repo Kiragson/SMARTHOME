@@ -49,7 +49,7 @@ $conn->close();
                     <div class='row justify-content-center mt-5'>
                         <div class="mb-3">
                             <label for="room_name" class="form-label">Nazwa domu</label>
-                            <input type="text" class="form-control" id="room_name" name="room_name" aria-describedby="text" required>
+                            <input type="text" class="form-control" id="nazwa_domu" name="nazwa_domu" aria-describedby="text" required>
                         </div>
                         <div class="mb-3">
                             <label for="postalCode" class="form-label">Kod pocztowy</label>

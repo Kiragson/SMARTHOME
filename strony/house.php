@@ -21,7 +21,7 @@
     $login = $_SESSION['username'];
 
     // Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
-    $sql = "SELECT u.id, u.login, h.id AS house_id, h.name AS house_name, f.id_admin AS id_admin,
+    $sql = "SELECT u.id, u.login, u.number_of_houses AS NOH, h.id AS house_id, h.name AS house_name, f.id_admin AS id_admin,
         r.id AS room_id, r.name AS room_name,
         d.id AS device_id, d.name AS device_name, d.state AS device_stan
         FROM User u
@@ -57,7 +57,11 @@
             $deviceId = $row['device_id'];
             $deviceStan = $row['device_stan'];
             $isAdmin = ($userId == $idAdmin);
+            $numberHouse= $row['NOH'];
 
+            if(!isset($numberHouse)){
+                $numberHouse=0;
+            }
             // Jeśli to jest nowy dom, utwórz nową strukturę domu
             if (!isset($houses[$houseId])) {
                 $houses[$houseId] = [
@@ -94,7 +98,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Twoje domy</title>
     <?php include '../template/css.php'; ?>
     
 </head>
@@ -106,79 +110,91 @@
         <?php echo $userInfo; ?>
         <div class='row justify-content-center mt-5'>
             <?php foreach ($houses as $houseId => $houseData): ?>
-                <div class='col-8 navbar-light mt-5 p-3 rounded border border-3 h-100' style='background-color: #e3f2fd;'>
-                    <div class='row justify-content-center mt-5'>
-                        <div class='col-10'>
-                            <h3><?php echo $houseData['name']; ?></h3>
-                        </div>
-                        <div class="col-1 dropdown">
-                            <button class="btn" role="button" id="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <i class="bi bi-sliders"></i>
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>">
-                                <a class="dropdown-item" href="edytuj.php?id_domu=<?php echo $houseData['id_house']; ?>">Edytuj</a>
-                                <a class="dropdown-item" href="usun.php?id_domu=<?php echo $houseData['id_house']; ?>">Usuń</a>
-                                <a class="dropdown-item" href="#" onclick="pokazInformacje(<?php echo $houseData['id_house']; ?>)">Informacje</a>
+                <?php if ($numberHouse>0): ?>
+                    <?php print_r($numberHouse); 
+                    ?>
+                    <div class='col-8 navbar-light mt-5 p-3 rounded border border-3 h-100' style='background-color: #e3f2fd;'>
+                        <div class='row justify-content-center mt-5'>
+                            <div class='col-10'>
+                                <h3><?php echo $houseData['name']; ?></h3>
+                            </div>
+                            <div class="col-1 dropdown">
+                                <button class="btn" role="button" id="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <i class="bi bi-sliders"></i>
+                                </button>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>">
+                                    <a class="dropdown-item" href="edytuj.php?id_domu=<?php echo $houseData['id_house']; ?>">Edytuj</a>
+                                    <a class="dropdown-item" href="usun.php?id_domu=<?php echo $houseData['id_house']; ?>">Usuń</a>
+                                    <a class="dropdown-item" href="#" onclick="pokazInformacje(<?php echo $houseData['id_house']; ?>)">Informacje</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <?php foreach ($houseData['rooms'] as $roomId => $roomData): ?>
-                        <div class="mt-3 px-5 py-2 rounded border border-3">
-                            <div class='row  mt-2'>
-                                <div class="col-3 ml-5 row">
-                                    <h4><?php echo $roomData['name']; ?></h4>
-                                </div>
-                                <div class="col-3 ml-5 row"></div>
-                                <div class="col-3 ml-5 row">
-                                    <form action="http://localhost/studia/SMARTHOME/strony/new_device.php" method="POST">
-                                        <?php //echo $houseId ?>
-                                        <input type="hidden" name="id_house" value="<?php echo $houseId; ?>">
-                                        <?php //echo $roomId ?>
-                                        <button class="btn btn-primary p-2" type="submit">Dodaj urządzenia</button>
-                                    </form>
-                                    
+                        <?php foreach ($houseData['rooms'] as $roomId => $roomData): ?>
+                            <div class="mt-3 px-5 py-2 rounded border border-3">
+                                <div class='row  mt-2'>
+                                    <div class="col-3 ml-5 row">
+                                        <h4><?php echo $roomData['name']; ?></h4>
+                                    </div>
+                                    <div class="col-3 ml-5 row"></div>
+                                    <div class="col-3 ml-5 row">
+                                        <form action="http://localhost/studia/SMARTHOME/strony/new_device.php" method="POST">
+                                            <?php //echo $houseId ?>
+                                            <input type="hidden" name="id_house" value="<?php echo $houseId; ?>">
+                                            <?php //echo $roomId ?>
+                                            <button class="btn btn-primary p-2" type="submit">Dodaj urządzenia</button>
+                                        </form>
+                                        
 
+                                    </div>
                                 </div>
+                                
+                                <?php if (!empty($roomData['devices'])): ?>
+                                    <ul>
+                                        <?php foreach ($roomData['devices'] as $deviceData): ?>
+                                            <li>
+                                                <?php echo $deviceData['name']; ?>
+                                                <button id="deviceButton_<?php echo $deviceData['id']; ?>" onclick="toggleDeviceState(<?php echo $deviceData['id']; ?>)">
+                                                    <?php echo ($deviceData['stan'] == 1) ? "On" : "Off"; ?>
+                                                </button>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
+                                <?php else: ?>
+                                    <p>Brak urządzeń w pokoju</p>
+                                <?php endif; ?>
+                                
                             </div>
-                            
-                            <?php if (!empty($roomData['devices'])): ?>
-                                <ul>
-                                    <?php foreach ($roomData['devices'] as $deviceData): ?>
-                                        <li>
-                                            <?php echo $deviceData['name']; ?>
-                                            <button id="deviceButton_<?php echo $deviceData['id']; ?>" onclick="toggleDeviceState(<?php echo $deviceData['id']; ?>)">
-                                                <?php echo ($deviceData['stan'] == 1) ? "On" : "Off"; ?>
-                                            </button>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            <?php else: ?>
-                                <p>Brak urządzeń w pokoju</p>
-                            <?php endif; ?>
-                            
-                        </div>
-                    <?php endforeach; ?>
-                    <div class='row justify-content-center mt-4'>
-                        <div class="col-4 justify-content-center row">
-                            <a class="btn btn-primary p-2" href="http://localhost/studia/SMARTHOME/strony/new_room.php">Dodaj pokój</a>
+                        <?php endforeach; ?>
+                        <div class='row justify-content-center mt-4'>
+                            <div class="col-4 justify-content-center row">
+                                <a class="btn btn-primary p-2" href="http://localhost/studia/SMARTHOME/strony/new_room.php">Dodaj pokój</a>
+                            </div>
                         </div>
                     </div>
-                </div>
+                <?php else: ?>
+                    <div class='col-8 navbar-light my-5 p-3 rounded border border-3 h-100' style='background-color: #e3f2fd;'>
+                        <div class='text-center my-5'>
+                            <p class="h3">Nie posiadaż żadnych domów</p>
+                        </div>
+                    </div>
+                <?php endif; ?>
             <?php endforeach; ?>
         </div>
     </div>
-    <div class="container mt-2">
-        <div class="row justify-content-center mt-5">
-            <div class="col-8 btn-container">
-                <a class="btn btn-light rounded p-3 mb-3" href="http://localhost/studia/SMARTHOME/strony/new_house.php" >Dodaj nowy dom</a>
-            </div>
-            <div>
-                <?php if (!empty($message)): ?>
-                    <script>alert('$message');</script>
-                <?php endif; ?>
+    <?php if ($numberHouse<=5): ?>
+        <div class="container mt-2">
+            <div class="row justify-content-center mt-5">
+                <div class="col-8 btn-container text-center">
+                    <a class="btn btn-secondary rounded p-3 mb-3" href="http://localhost/studia/SMARTHOME/strony/new_house.php" >Dodaj nowy dom</a>
+                </div>
+                <div>
+                    <?php if (!empty($message)): ?>
+                        <script>alert('$message');</script>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
-    </div>
+    <?php endif; ?>
     <script>
     var socket = new WebSocket("ws://localhost:8080");
 

@@ -1,8 +1,8 @@
 <?php
 $host = "localhost";
-$DBusername = "admin";
-$DBpassword = "admin"; // Zmień na prawidłowe hasło
-$database = "smarthouse";
+$DBusername = "witryna";
+$DBpassword = "zaq1@WSX"; // Zmień na prawidłowe hasło
+$database = "smarthome";
 
 $conn = new mysqli($host, $DBusername, $DBpassword, $database);
 

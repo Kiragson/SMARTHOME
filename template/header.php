@@ -1,6 +1,10 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light">
+<nav class="navbar navbar-expand-lg navbar-secondary bg-secondary">
   <div class="container-fluid">
-    <a class="navbar-brand" href="http://localhost/studia/SMARTHOME/strony/index.php">Logo</a>
+    <a class="navbar-brand" href="http://localhost/studia/SMARTHOME/strony/index.php">
+      
+        <img src="../img/logov3.png" alt="SMARTHOME" width="50" height="50" />
+      
+    </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -14,7 +18,6 @@
           <a class="nav-link" href="#">Ustawienia</a>
         </li>
         <li class="nav-item">
-        
           <a class="nav-link" href="#">Powiadomienia</a>
         </li>
         <li class="nav-item">

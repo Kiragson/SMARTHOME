@@ -23,7 +23,12 @@
                     </div>
                     <div class="mb-3">
                         <label for="inputPassword5" class="form-label">Password:</label>
-                        <input type="password" id="password" name="password" placeholder="Hasło" class="form-control" aria-describedby="passwordHelpBlock">
+                        <div class="input-group">
+                            <input type="password" id="password" name="password" placeholder="Hasło" class="form-control" aria-describedby="passwordHelpBlock">
+                            <button type="button" id="showPassword" class="btn btn-light">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                         <div id="passwordHelpBlock" class="form-text">
                             Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters, or emoji.
                         </div>
@@ -60,6 +65,16 @@
                 errorMessage.setAttribute("aria-alert", "true"); // Zmiana atrybutu aria-alert na true
             } else {
                 errorMessage.setAttribute("aria-alert", "false"); // Zmiana atrybutu aria-alert na false
+            }
+        });
+        const passwordInput = document.getElementById("password");
+        const showPasswordButton = document.getElementById("showPassword");
+
+        showPasswordButton.addEventListener("click", function () {
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+            } else {
+                passwordInput.type = "password";
             }
         });
     </script>

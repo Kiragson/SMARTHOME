@@ -20,17 +20,21 @@ function is_password_valid($password) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST["email"];
     $haslo = $_POST["password"];
+    $login = $_POST["login"];
 
     // Sprawdzenie, czy email i hasło zostały wpisane
-    if (empty($email) || empty($haslo)) {
+    if (empty($email) || empty($haslo)|| empty($login)) {
         $error_message = "Proszę wypełnić wszystkie pola. Wprowadzono hasło: $haslo email: $email";
     } else {
         // Zabezpiecz dane przed SQL Injection i filtrowaniem skryptów
         $email = mysqli_real_escape_string($conn, $email);
         $email = htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); // Filtrowanie tekstu
+        $login = mysqli_real_escape_string($conn, $email);
+        $login = htmlspecialchars($email, ENT_QUOTES, 'UTF-8'); // Filtrowanie tekstu
+
 
         // Sprawdzenie, czy login jest poprawnym adresem email
-        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !filter_var($login, FILTER_VALIDATE_EMAIL)) {
             $error_message = "Podany email nie jest poprawnym adresem email.";
         } else {
             // Sprawdzenie, czy użytkownik o danej nazwie już istnieje
@@ -38,27 +42,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $check_result = $conn->query($check_query);
 
             if ($check_result->num_rows > 0) {
-                $error_message = "Użytkownik o nazwie '$email' już istnieje.";
+                $error_message = "Użytkownik z adresem '$email' już istnieje.";
             } else {
-                // Sprawdzenie, czy hasło spełnia warunki
-                $password_error = is_password_valid($haslo);
-
-                if (empty($password_error)) {
-                    // Haszowanie hasła (możesz użyć bardziej zaawansowanych metod haszowania)
-                    $haslo_hashed = password_hash($haslo, PASSWORD_DEFAULT);
-
-                    // Zapytanie SQL do dodania użytkownika do bazy danych
-                    $insert_query = "INSERT INTO user (email, password, rank) VALUES ('$email', '$haslo_hashed','2')";
-
-                    if ($conn->query($insert_query) === TRUE) {
-                        $_SESSION["username"] = $email; // Poprawienie przypisania do sesji
-                        header("Location: http://localhost/studia/SMARTHOME/strony/house.php");
-                        exit; // Przekierowano, nie ma potrzeby dalszego wykonywania kodu
-                    } else {
-                        $error_message = "Błąd podczas rejestracji: " . $conn->error;
-                    }
+                $check_query = "SELECT id FROM user WHERE email = '$login'";
+                $check_result = $conn->query($check_query);
+                if ($check_result->num_rows > 0) {
+                    $error_message = "Użytkownik o nazwie '$login' już istnieje.";
                 } else {
-                    $error_message = $password_error;
+                
+                    // Sprawdzenie, czy hasło spełnia warunki
+                    $password_error = is_password_valid($haslo);
+
+                    if (empty($password_error)) {
+                        // Haszowanie hasła (możesz użyć bardziej zaawansowanych metod haszowania)
+                        $haslo_hashed = password_hash($haslo, PASSWORD_DEFAULT);
+
+                        // Zapytanie SQL do dodania użytkownika do bazy danych
+                        $insert_query = "INSERT INTO user (email, password, rank) VALUES ('$email', '$haslo_hashed','2')";
+
+                        if ($conn->query($insert_query) === TRUE) {
+                            $_SESSION["username"] = $email; // Poprawienie przypisania do sesji
+                            header("Location: http://localhost/studia/SMARTHOME/strony/house.php");
+                            exit; // Przekierowano, nie ma potrzeby dalszego wykonywania kodu
+                        } else {
+                            $error_message = "Błąd podczas rejestracji: " . $conn->error;
+                        }
+                    } else {
+                        $error_message = $password_error;
+                    }
                 }
             }
         }

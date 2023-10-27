@@ -17,14 +17,17 @@ session_start();
                 <h2>Formularz Rejestracji</h2>
                 <form method="post" action="http://localhost/studia/SMARTHOME/php_script/rejestracja.php" id="registration-form">
                     <div class="mb-3">
-                        <label for="exampleInputEmail1" class="form-label">Email:</label>
-                        <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Email">
-                        <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                        <label for="Login" class="form-label">Login:*</label>
+                        <input type="text" class="form-control" id="Login" name="Login" aria-describedby="LoginHelp" placeholder="Login" required>
                     </div>
                     <div class="mb-3">
-                        <label for="inputPassword5" class="form-label">Password:</label>
+                        <label for="email" class="form-label">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Email">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password:*</label>
                         <div class="input-group">
-                            <input type="password" id="password" class="form-control" name="password" aria-describedby="passwordHelpBlock" placeholder="Password">
+                            <input type="password" id="password" class="form-control" name="password" aria-describedby="passwordHelpBlock" placeholder="Password" required>
                             <button type="button" id="showPassword" class="btn btn-light">
                                 <i class="bi bi-eye"></i>
                             </button>
@@ -39,18 +42,19 @@ session_start();
                     </div>
                 </form>
                 <div id="error-message" class="text-danger">
-                <?php
-                if (!empty($_GET["error_message"])) {
-                    echo '<div class="error-message">' . htmlspecialchars($_GET["error_message"]) . '</div>';
-                }
-                ?>
+                    <?php
+                    if (!empty($_GET["error_message"])) {
+                        echo '<div class="error-message">' . htmlspecialchars($_GET["error_message"]) . '</div>';
+                    }
+                    ?>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
     <script>
-        const passwordInput = document.getElementById("haslo");
+        
+        const passwordInput = document.getElementById("password");
         const showPasswordButton = document.getElementById("showPassword");
 
         showPasswordButton.addEventListener("click", function () {
@@ -69,6 +73,8 @@ session_start();
                 document.getElementById("error-message").innerHTML = "Wprowadź poprawny email i hasło.";
             }
         });
+        
+        
 
         function validateEmail(email) {
             // Prosta walidacja adresu email za pomocą wyrażenia regularnego

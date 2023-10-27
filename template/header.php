@@ -14,17 +14,14 @@
           <a class="nav-link" href="#">Ustawienia</a>
         </li>
         <li class="nav-item">
-        <div class="dropdown">
-          <a class="btn nav-link dropdown-toggle" id="twoje-konto-link" role="button" data-bs-target="#linki" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            Twoje konto
-          </a>
-          <div class="dropdown-menu" id="linki" aria-labelledby="twoje-konto-link">
-            <a class="dropdown-item" href="http://localhost/studia/SMARTHOME/strony/konto.php">Konto</a>
-            <div class="dropdown-divider"></div>
-            <a class="dropdown-item" href="http://localhost/studia/SMARTHOME/php_script/wyloguj.php">Wyloguj</a>
-          </div>
-        </div>
-
+        
+          <a class="nav-link" href="#">Powiadomienia</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://localhost/studia/SMARTHOME/strony/konto.php">Konto</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="http://localhost/studia/SMARTHOME/php_script/wyloguj.php">Wyloguj</a>
         </li>
       </ul>
     </div>

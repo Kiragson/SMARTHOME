@@ -44,7 +44,7 @@ $conn->close();
             <div class="col-8 navbar-light p-5 rounded h-100" style="background-color: #e3f2fd;">
                 <h1>Informacje o koncie</h1>
                 <div class="p-2 m-2">
-                    <p>Nazwa użytkownika <?php echo $login; ?></p>
+                    <p>Nazwa użytkownika <?php echo $login; ?> #<?php echo $id; ?> </p>
                     <p>Imię Nazwisko <?php echo $imie; ?> <?php echo $nazwisko; ?></p>
                     <p>Adres email <?php echo $email; ?></p>
                     <p>Nr tel <?php echo $telefon; ?></p>

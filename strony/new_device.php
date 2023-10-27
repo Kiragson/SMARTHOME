@@ -71,6 +71,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <div class='row justify-content-center mt-5'>
             <div class='col-8 navbar-light mt-5 p-3 rounded border border-3 h-100' style='background-color: #e3f2fd;'>
+                <div class="mb-3">
+                    <h3>Nowe urządzenie</h3>
+                </div>
                 <form action="http://localhost/studia/SMARTHOME/php_script/add_device.php" method="POST" id="add_device-form">
                 <div class='row justify-content-center mt-5'>
                     <div class="mb-3">

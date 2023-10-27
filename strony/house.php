@@ -25,7 +25,7 @@
         r.id AS room_id, r.name AS room_name,
         d.id AS device_id, d.name AS device_name, d.state AS device_stan
         FROM User u
-        LEFT JOIN Family f ON u.id = f.admin_user1 OR u.id = f.admin_user2 OR u.id = f.admin_user3 OR u.id = f.admin_user4 OR u.id = f.admin_user5 OR u.id = f.admin_user6 
+        LEFT JOIN Family f ON u.id = f.user1 OR u.id = f.user2 OR u.id = f.user3 OR u.id = f.user4 OR u.id = f.user5 OR u.id = f.user6 
         LEFT JOIN House h ON f.id = h.family_id
         LEFT JOIN Room r ON h.id = r.house_id
         LEFT JOIN Device d ON r.id = d.room_id
@@ -170,31 +170,12 @@
     <div class="container mt-2">
         <div class="row justify-content-center mt-5">
             <div class="col-8 btn-container">
-                <a class="btn btn-light rounded p-3 mb-3" href="#" onclick="pokazFormularzDodawaniaDomu()">Dodaj nowy dom</a>
+                <a class="btn btn-light rounded p-3 mb-3" href="http://localhost/studia/SMARTHOME/strony/new_house.php" >Dodaj nowy dom</a>
             </div>
             <div>
                 <?php if (!empty($message)): ?>
                     <script>alert('$message');</script>
                 <?php endif; ?>
-            </div>
-        </div>
-    </div>
-    <div class="container mt-2">
-        <div class="row justify-content-center mt-5">
-            <div class="col-8">
-                <div class="card" id="formularz-dodawania-domu" >
-                    <div class="card-body">
-                        <h5 class="card-title">Dodaj nowy dom</h5>
-                        <form action="http://localhost/studia/SMARTHOME/php_script/ad_home.php" method="post">
-                            <div class="mb-3">
-                                <label for="nazwa_domu" class="form-label">Nazwa domu:</label>
-                                <input type="text" class="form-control" id="nazwa_domu" name="nazwa_domu" required>
-                            </div>
-                            <!-- Dodaj inne pola formularza, np. adres, opis itp. -->
-                            <button type="submit" class="btn btn-primary">Dodaj Dom</button>
-                        </form>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -281,6 +262,5 @@
     </script>
     
     <?php include '../template/script.php'; ?>
-    <?php include '../template/footer.php'; ?>
 </body>
 </html>

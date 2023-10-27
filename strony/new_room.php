@@ -86,6 +86,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="container">
         <div class='row justify-content-center mt-5'>
             <div class='col-8 navbar-light mt-5 p-3 rounded border border-3 h-100' style='background-color: #e3f2fd;'>
+                <div class="mb-3">
+                    <h3>Nowy Pokój</h3>
+                </div>
                 <form action="new_room.php" method="POST" id="new_room-form">
                     <div class='row justify-content-center mt-5'>
                         <div class="mb-3">

@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stan = $_POST['stan'];
 
     // Sprawdź, czy urządzenie o podanym IP już istnieje w bazie
-    $sqlCheck = "SELECT id FROM device WHERE ip_adres = ?";
+    $sqlCheck = "SELECT id FROM device WHERE ip = ?";
     $stmtCheck = $conn->prepare($sqlCheck);
     $stmtCheck->bind_param("s", $ipAddress);
     $stmtCheck->execute();
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // Urządzenie o podanym IP nie istnieje, więc dodajemy nowe
-    $sql = "INSERT INTO device (name, ip_adres, id_room, stan) VALUES (?, ?, ?, ?)";
+    $sql = "INSERT INTO device (name, ip, room_id, state) VALUES (?, ?, ?, ?)";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("ssii", $name, $ipAddress, $roomId, $stan);
 

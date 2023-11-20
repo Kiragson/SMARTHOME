@@ -15,7 +15,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     // Sprawdź, czy parametr id_house został przekazany w adresie URL
 
-    $sql = "SELECT nazwa FROM house WHERE id = ?";
+    $sql = "SELECT name FROM house WHERE id = ?";
 
     // Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
     $stmt = $conn->prepare($sql);
@@ -31,7 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = $result->fetch_assoc();
 
         // Pobieramy nazwę domu
-        $houseName = $row['nazwa'];
+        $houseName = $row['name'];
 
         // Możesz teraz wykorzystać zmienną $houseName, która zawiera nazwę domu
     } else {
@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->close();
 
     // Pobierz dostępne pokoje dla danego domu
-    $sql = "SELECT id, name FROM room WHERE id_house = ?";
+    $sql = "SELECT id, name FROM room WHERE house_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $idHouse);
     $stmt->execute();
@@ -64,8 +64,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <?php include 'http://localhost/studia/SMARTHOME/template/css.php'; ?>
-    <?php include 'http://localhost/studia/SMARTHOME/template/script.php'; ?>
+    <?php include '../template/css.php'; ?>
+    <?php include '../template/script.php'; ?>
 </head>
 <body>
     <div class="container">

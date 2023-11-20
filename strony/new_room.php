@@ -23,7 +23,7 @@ while ($row = $result->fetch_assoc()) {
 }
 foreach ($domes as $dom) {
     $houseId = $dom['id'];
-    $houseName = $dom['nazwa'];
+    $houseName = $dom['name'];
     
     echo "Identyfikator domu: $houseId, Nazwa domu: $houseName<br>";
 }
@@ -40,7 +40,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $idHouse = $_POST['id_house'];
     
     // Przygotuj zapytanie SQL do dodania nowego pokoju
-    $sql = "INSERT INTO room (name, id_house) VALUES (?, ?)";
+    $sql = "INSERT INTO room (name, house_id) VALUES (?, ?)";
     
     // Przygotuj zapytanie SQL
     $stmt = $conn->prepare($sql);
@@ -99,7 +99,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <label for="id_house" class="form-label">Wybierz dom:</label>
                             <select class="form-select" name="id_house" id="id_house">
                                 <?php foreach ($domes as $dom): ?>
-                                    <option value="<?php echo $dom['id']; ?>"><?php echo $dom['nazwa']; ?></option>
+                                    <option value="<?php echo $dom['id']; ?>"><?php echo $dom['name']; ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>

@@ -30,10 +30,10 @@ wss.on('connection', (ws) => {
             ws.send(response);
     
             // Powiadom innych klientów o zmianie stanu
-            broadcastDeviceStateChange(device_id, state);
+            //broadcastDeviceStateChange(device_id, state);
         } catch (error) {
             // Obsłuż błąd z funkcji updateDeviceStateInDatabase
-            console.error("Serwer.js: Wystąpił błąd - " + error.message);
+            console.error("Serwer.js/36: Wystąpił błąd - " + error.message);
             // Tutaj możesz obsłużyć błąd lub wyświetlić komunikat użytkownikowi
         }
     });
@@ -52,7 +52,7 @@ wss.on('connection', (ws) => {
 });
 
 function broadcastDeviceStateChange(device_id, new_state) {
-    console.log("Serwer.js broadcast device");
+    console.log("Serwer.js/55: broadcast device");
     const message = JSON.stringify({
         device_id: device_id,
         state: new_state,
@@ -70,31 +70,24 @@ const axios = require('axios');
 function updateDeviceStateInDatabase(device_id) {
     // Przygotuj dane do wysłania na serwer
     
-    
-
-    // Wyślij żądanie HTTP POST, aby odczytać i zmienić stan urządzenia
-    //console.log(device_id);
-    //var Sdevice_id=String(device_id);
-    //console.log(Sdevice_id);
-    //axios.post('http://localhost/studia/SMARTHOME/update_device_state.php', Sdevice_id)
     var deviceid= new FormData();
     deviceid.append("device_id",device_id);
 
-    fetch('http://localhost/studia/SMARTHOME/php_script/update_device_state.php', {
-        method: 'POST',
-        body: deviceid
-      })
-        .then(response => response.json())
+    fetch('http://localhost/studia/SMARTHOME/php_script/update_device_state.php?device_id=' + device_id)
+        .then(response => {
+            // Check if the response status is OK (200)
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            // Convert the response to JSON
+            return response.json();
+        })
         .then(responseData => {
             // Obsługa odpowiedzi od skryptu PHP
-            //const responseData = response.data;
 
             if (responseData.success) {
                 // Zaktualizowano stan urządzenia pomyślnie
                 console.log("Serwer.js: Stan urządzenia został zaktualizowany pomyślnie.");
-                // Tutaj możesz podjąć dodatkowe działania w przypadku sukcesu
-
-                // Przykład: Zaktualizowanie tekstu przycisku
                 if (typeof document !== 'undefined') {
                     var buttonElement = document.getElementById("deviceButton_" + device_id);
                     if (buttonElement) {
@@ -109,30 +102,27 @@ function updateDeviceStateInDatabase(device_id) {
                     console.log('Ten kod jest wykonywany poza środowiskiem przeglądarki.');
                 }
 
-                // Uruchom funkcję 'switch' z danymi z bazy
-                //switch_device(responseData.newDeviceState, responseData.ip_address);
+                switch_device(responseData.newDeviceState, responseData.ip_address);
             } else {
                 // Błąd podczas aktualizacji stanu urządzenia
                 console.error("Serwer.js updateDeviceStateInDatabase(): Błąd podczas aktualizacji stanu urządzenia: " + responseData.message);
-                // Tutaj możesz obsłużyć błąd lub wyświetlić komunikat użytkownikowi
-                // Dodaj obsługę błędu
                 handleError(responseData.message);
             }
         })
         .catch(error => {
             if (error && error.message) {
-                //Tutaj obsłuż błąd sieci lub inny błąd żądania HTTP
-                console.error("Serwer.js updateDeviceStateInDatabase(): Błąd podczas wysyłania żądania HTTP:" + error.message);
+                console.error("Serwer.js/122: updateDeviceStateInDatabase(): Błąd podczas wysyłania żądania HTTP:" + error.message);
                 handleError(error.message);
 
                 //return error;
             }else {
-                console.error("Serwer.js updateDeviceStateInDatabase(): Błąd - obiekt błędu jest niezdefiniowany lub nie zawiera właściwości 'message'");
+                console.error("Serwer.js/127: updateDeviceStateInDatabase(): Błąd - obiekt błędu jest niezdefiniowany lub nie zawiera właściwości 'message'");
             }
          });
 }
 function switch_device(stan, ip_address){
     console.log(stan+" "+ip_address);
+
 }
 function handleError(errorMessage) {
     // Informacja o błedzie
@@ -143,5 +133,5 @@ function handleError(errorMessage) {
 
 const port = 8080;
 server.listen(port, () => {
-    console.log(`Serwer WebSocket nasłuchuje na porcie ${port}`);
+    console.log(`serwer.js/143: Serwer WebSocket nasłuchuje na porcie ${port}`);
 });

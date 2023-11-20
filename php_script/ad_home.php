@@ -10,10 +10,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         require_once("../connected.php"); // Zaimportuj połączenie do bazy danych
 
         $nazwa_domu = $_POST['nazwa_domu'];
+        $miasto=$_POST['city'];
+        $kod=$_POST['postalCode'];
         $login = $_SESSION['username'];
         $user_id = $_SESSION['user_id']; // Pobierz ID zalogowanego użytkownika
-        //echo $user_id;
-        // Przygotuj zapytanie SQL, aby dodać nowy dom
+        
+    
         
 
         $insertFamilySql = "INSERT INTO family (id_admin,user1) VALUES (?,?)";
@@ -22,17 +24,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         
         if ($stmt->execute()) {
-            // Dodano dom pomyślnie
+            // Dodano Rodzine pomyślnie
             $response['success'] = true;
             $response['message'] = "Utworzono Rodzine dla usera id: $user_id";
 
             // Pobierz ostatnio dodane id_domu
             $lastInsertedFamilyId = $conn->insert_id;
 
-            // Utwórz rodzinę z id_admin ustawionym na id_domu
-            $insertDomSql = "INSERT INTO house (name, family_id) VALUES (?, ?)";
+            // Utwórz dom z family_id ustawionym na id_domu
+            $insertDomSql = "INSERT INTO house (name, family_id, city, postcode) VALUES (?, ?,?,?)";
             $stmt = $conn->prepare($insertDomSql);
-            $stmt->bind_param("si", $nazwa_domu, $lastInsertedFamilyId);
+            $stmt->bind_param("sisi", $nazwa_domu, $lastInsertedFamilyId,$miasto,$kod);
             $lastInsertedDomId=$conn->insert_id;
 
             if ($stmt->execute()) {

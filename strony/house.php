@@ -55,9 +55,11 @@
             $isAdmin = ($userId == $idAdmin);
             $numberHouse= $row['NOH'];
             // Jeśli urzytkownik ma domy
+            
             if(!isset($numberHouse)){
                 $numberHouse=0;
             }
+            
             // Jeśli to jest nowy dom, utwórz nową strukturę domu
             if (!isset($houses[$houseId])) {
                 $houses[$houseId] = [
@@ -98,7 +100,6 @@
 <body>
     <?php include '../template/header.php'; ?>
     <div class="container">
-        <?php echo $userInfo; ?>
         <div class='row justify-content-center mt-5'>
             <?php foreach ($houses as $houseId => $houseData): ?>
                 <?php if ($numberHouse>0): ?>
@@ -112,9 +113,9 @@
                                     <i class="bi bi-sliders"></i>
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>">
-                                    <a class="dropdown-item" href="edytuj.php?id_domu=<?php echo $houseData['id_house']; ?>">Edytuj</a>
+                                    <a class="dropdown-item" href="edit_house.php?id_domu=<?php echo $houseData['id_house']; ?>">Edytuj</a>
                                     <a class="dropdown-item" href="../php_script/usun.php?id_domu=<?php echo $houseData['id_house']; ?>">Usuń</a>
-                                    <a class="dropdown-item" href="#" onclick="pokazInformacje(<?php echo $houseData['id_house']; ?>)">Informacje</a>
+                                    <a class="dropdown-item" href="info_house.php?id_domu=<?php echo $houseData['id_house']; ?>" >Informacje</a>
                                 </div>
                             </div>
                         </div>
@@ -135,7 +136,7 @@
                                 <?php if (!empty($roomData['devices'])): ?>
                                     <ul>
                                         <?php foreach ($roomData['devices'] as $deviceData): ?>
-                                            <li>
+                                            <li class="mt-2">
                                                 <?php echo $deviceData['name']; ?>
                                                 <button id="deviceButton_<?php echo $deviceData['id']; ?>" onclick="toggleDeviceState(<?php echo $deviceData['id']; ?>)">
                                                     <?php echo ($deviceData['stan'] == 1) ? "On" : "Off"; ?>
@@ -180,7 +181,6 @@
     <?php endif; ?>
     <script>
         var socket = new WebSocket("ws://localhost:8080");
-
         // Obsługa zdarzenia po nawiązaniu połączenia WebSocket
         socket.onopen = function (event) {
             console.log("Połączono z serwerem WebSocket.");
@@ -193,43 +193,41 @@
             if (response.success) {
                 // Zaktualizuj stan przycisku na stronie
                 var button = document.getElementById("deviceButton_" + response.device_id);
-                console.log("Zmiana stanu");
+                console.log("House.php/195: Zmiana stanu");
                 if (button.innerHTML === "On") {
                     button.innerHTML = "Off";
                 } else {
                     button.innerHTML = "On";
                 }
             } else {
-                console.error("Wystąpił błąd podczas zmiany stanu urządzenia");
+                console.error("House.php/202: Wystąpił błąd podczas zmiany stanu urządzenia");
             }
         };
 
         // Obsługa zdarzenia po rozłączeniu z serwerem WebSocket
         socket.onclose = function (event) {
             if (event.wasClean) {
-                console.log("Zamknięto połączenie z serwerem WebSocket.");
+                console.log("House.php/209: Zamknięto połączenie z serwerem WebSocket.");
             } else {
-                console.error("Nieoczekiwane rozłączenie z serwerem WebSocket.");
+                console.error("House.php/211: Nieoczekiwane rozłączenie z serwerem WebSocket.");
             }
         };
 
         // Obsługa zdarzenia błędu
         socket.onerror = function (error) {
-            console.error("Błąd połączenia z serwerem WebSocket: " + error.message);
+            console.error("House.php/217: Błąd połączenia z serwerem WebSocket: " + error.message);
         };
-
         // Funkcja do przełączania stanu urządzenia
-        function toggleDevice(deviceId, currentState) {
-            console.log("Przycisk kliknięty dla urządzenia o ID: " + deviceId);
+        function toggleDevice(device_id, currentState) {
+            console.log("House.php/222: Przycisk kliknięty dla urządzenia o ID: " + device_id);
 
             // Przygotuj dane do wysłania jako JSON
-            var message = JSON.stringify({ device_id: deviceId, state: currentState });
+            var message = JSON.stringify({ device_id: device_id, state: currentState });
 
             // Wyślij dane na serwer WebSocket
             socket.send(message);
-            console.log("Wysyłanie danych na serwer");
+            console.log("House.php/229: Wysyłanie danych na serwer");
         }
-
         // Funkcja do pobierania i aktualizacji stanu urządzenia
         function toggleDeviceState(device_id) {
             // Wysyłanie zapytania do serwera w celu pobrania stanu urządzenia
@@ -239,14 +237,14 @@
                     // Aktualizacja tekstu przycisku i wywołanie funkcji do przełączania stanu
                     const buttonElement = document.getElementById('deviceButton_' + device_id);
                     if (buttonElement) {
-                        console.log("Zmiana Stanu");
+                        console.log("House.php/241: Zmiana Stanu");
                         if (data.state === 0) {
                             buttonElement.innerHTML = "Off";
                         } else if (data.state === 1){
                             buttonElement.innerHTML = "On";
                         }
                         else{
-                            console.error("Hoise.php: Błędny stan przycisku")
+                            console.error("House.php/248: Błędny stan przycisku")
                         }
 
                         // Wywołanie funkcji do przełączania stanu z aktualnym stanem

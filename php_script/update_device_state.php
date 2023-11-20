@@ -11,14 +11,14 @@ ini_set('display_errors', '1');
 // Połącz się z bazą danych
 require_once("../connected.php");
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $deviceId = $_POST['device_id'];
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $deviceId = $_GET['device_id'];
     error_log($deviceId);
 }
 if(isset($deviceId))
 {
         // Pobierz bieżący stan urządzenia z bazy danych
-    $sql = "SELECT stan FROM device WHERE id = ?";
+    $sql = "SELECT state FROM device WHERE id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $deviceId);
     $stmt->execute();
@@ -31,7 +31,7 @@ if(isset($deviceId))
     $newDeviceState = ($currentDeviceState == 0) ? 1 : 0;
 
     // Przygotuj zapytanie SQL, aby zaktualizować stan urządzenia
-    $updateSql = "UPDATE device SET stan = ? WHERE id = ?";
+    $updateSql = "UPDATE device SET state = ? WHERE id = ?";
     $stmt = $conn->prepare($updateSql);
     $stmt->bind_param("ii", $newDeviceState, $deviceId);
 
@@ -62,7 +62,7 @@ else {
 $conn->close();
 
 // Ustaw nagłówki odpowiedzi JSON
-//header('Content-Type: application/json');
+header('Content-Type: application/json');
 
 // Zwróć odpowiedź jako JSON
 echo json_encode($response);

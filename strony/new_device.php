@@ -10,8 +10,9 @@ if (isset($_GET['error'])) {
     $errorMessage = urldecode($_GET['error']);
     echo "<script>alert('$errorMessage');</script>";
 }
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $idHouse = $_POST['id_house'];
+if (isset($_GET['id_house'])){
+    $idHouse = $_GET['id_house'];
+
     
     // Sprawdź, czy parametr id_house został przekazany w adresie URL
 

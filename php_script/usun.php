@@ -9,7 +9,7 @@ if (isset($_GET['id_domu'])) {
 
     // Połączenie z bazą danych (zakładam, że masz już skonfigurowane połączenie)
     require_once("../connected.php");
-    $sql = "SELECT h.family_id, f.user1
+    $sql = "SELECT h.name, h.family_id, f.user1
     FROM House h 
     LEFT JOIN Family f ON f.id = h.family_id
     WHERE h.id = ?";
@@ -20,6 +20,7 @@ if (isset($_GET['id_domu'])) {
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
     $user1 = $row['user1'];
+    $nazwa_domu=$row['house_name'];
 
     // Sprawdź, czy użytkownik jest członkiem domu
     if ($user_id == $user1) {
@@ -92,9 +93,25 @@ if (isset($_GET['id_domu'])) {
             $response['success'] = true;
             $response['message'] = "Operacja zakończona pomyślnie. Usunięto dom, pokoje, urządzenia i rodzinę.";
     
-            // Po wykonaniu operacji przekieruj użytkownika z powrotem na poprzednią stronę
-            header("Location: {$_SERVER['HTTP_REFERER']}");
-            exit;
+            //wysłanie wiadomosci
+            $message=array(
+                'userId'=>$user_id,
+                'message'=>'Usunięto dom i jego zawartosc'.$nazwa_domu
+            );
+            $url='http://localhost/studia/SMARTHOME/php_script/add_mesage.php';
+            $ch=curl_init($url);
+
+            curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+            curl_setopt($ch,CURLOPT_POST,true);
+            curl_setopt($ch,CURLOPT_POSTFIELDS,$message);
+
+            $response=curl_exec($ch);
+
+            echo json_encode($response);
+
+            curl_close($ch);
+
+            
     
         } catch (Exception $e) {
             // W razie błędu cofnij transakcję
@@ -125,4 +142,7 @@ if (isset($_GET['id_domu'])) {
 header('Content-Type: application/json');
 echo json_encode($response);
 //echo $response;
+// Po wykonaniu operacji przekieruj użytkownika z powrotem na poprzednią stronę
+header("Location: {$_SERVER['HTTP_REFERER']}");
+exit;
 ?>

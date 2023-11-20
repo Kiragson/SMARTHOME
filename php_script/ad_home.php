@@ -57,7 +57,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $updateResult = $conn->query($alteruser);
 
                 }
+                //wysłanie wiadomosci
+                $message=array(
+                    'userId'=>$user_id,
+                    'message'=>'Utworzono dom '.$nazwa_domu
+                );
+                $url='http://localhost/studia/SMARTHOME/php_script/add_mesage.php';
+                $ch=curl_init($url);
 
+                curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+                curl_setopt($ch,CURLOPT_POST,true);
+                curl_setopt($ch,CURLOPT_POSTFIELDS,$message);
+
+                $response=curl_exec($ch);
+
+                echo json_encode($response);
+
+                curl_close($ch);
                 header('Location: http://localhost/studia/SMARTHOME/strony/house.php'); // Zakładam, że masz stronę o nazwie "house.php" z listą domów.
                 exit;
             } else {
@@ -86,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Ustaw nagłówki odpowiedzi JSON
-header('Content-Type: application/json');
+header('Content-Type: add_home/json');
 
 // Zwróć odpowiedź jako JSON
 echo json_encode($response);

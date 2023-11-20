@@ -39,15 +39,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST"){
                 $_SESSION["username"] = $row["login"];
                 $_SESSION["user_id"]=$row["id"];
                 header("Location: http://localhost/studia/SMARTHOME/strony/konto.php");
+                exit;
             } else {
                 $error = "Błędne hasło.";
+                header("Location: http://localhost/studia/SMARTHOME/strony/login.php?error=" . urlencode($error));
+                exit;
             }
         } else {
             $error = "Błędny login lub email.";
             header("Location: http://localhost/studia/SMARTHOME/strony/login.php?error=" . urlencode($error));
+            exit;
         }
     }
    
 }
+//header("Location: http://localhost/studia/SMARTHOME/strony/konto.php");
 $conn->close();
 ?>

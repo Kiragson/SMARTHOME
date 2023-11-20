@@ -39,23 +39,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Urządzenie zostało dodane pomyślnie
         $response = [
             'success' => true,
+            
+            'userId'=>$user_id,
             'message' => 'Urządzenie zostało dodane pomyślnie.'
         ];
-        header('Location: http://localhost/studia/SMARTHOME/strony/house.php?message=' . urlencode($response['message']));
     } else {
         // Błąd podczas dodawania urządzenia
         $response = [
             'success' => false,
+            
+            'userId'=>$user_id,
             'message' => 'Błąd podczas dodawania urządzenia: ' . $conn->error
         ];
-        header('Location: http://localhost/studia/SMARTHOME/strony/new_device.php?message=' . urlencode($response['message']));
     }
 
-    // Przekieruj z komunikatem sukcesu lub błędu
-    
+    //wysłanie wiadomosci
+    $url='http://localhost/studia/SMARTHOME/php_script/add_mesage.php';
+    $ch=curl_init($url);
 
+    curl_setopt($ch,CURLOPT_RETURNTRANSFER,true);
+    curl_setopt($ch,CURLOPT_POST,true);
+    curl_setopt($ch,CURLOPT_POSTFIELDS,$message);
+
+    $response=curl_exec($ch);
+
+    echo json_encode($response);
+
+    curl_close($ch);
+    // Ustaw nagłówki HTTP
+    header('Content-Type: application/json');
+    
+    // Zwróć odpowiedź w formie JSON
+    //echo json_encode($response);
+    
     $stmt->close();
+    header('Location: http://localhost/studia/SMARTHOME/strony/house.php'); // Zakładam, że masz stronę o nazwie "house.php" z listą domów.
     exit;
+
 }
 
 ?>

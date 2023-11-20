@@ -73,6 +73,8 @@ function updateDeviceStateInDatabase(device_id) {
     var deviceid= new FormData();
     deviceid.append("device_id",device_id);
 
+
+    //switch_device(responseData.newDeviceState, responseData.ip_address);
     fetch('http://localhost/studia/SMARTHOME/php_script/update_device_state.php?device_id=' + device_id)
         .then(response => {
             // Check if the response status is OK (200)
@@ -101,8 +103,6 @@ function updateDeviceStateInDatabase(device_id) {
                 }else{
                     console.log('Ten kod jest wykonywany poza środowiskiem przeglądarki.');
                 }
-
-                switch_device(responseData.newDeviceState, responseData.ip_address);
             } else {
                 // Błąd podczas aktualizacji stanu urządzenia
                 console.error("Serwer.js updateDeviceStateInDatabase(): Błąd podczas aktualizacji stanu urządzenia: " + responseData.message);
@@ -122,6 +122,7 @@ function updateDeviceStateInDatabase(device_id) {
 }
 function switch_device(stan, ip_address){
     console.log(stan+" "+ip_address);
+
 
 }
 function handleError(errorMessage) {

@@ -10,6 +10,7 @@
     if (isset($_GET['error'])) {
         $errorMessage = urldecode($_GET['error']);
         echo "<script>alert('$errorMessage');</script>";
+        header('Location: http://localhost/studia/SMARTHOME/strony/house.php');
         exit;
     }
     
@@ -103,7 +104,7 @@
         <div class='row justify-content-center mt-5'>
             <?php foreach ($houses as $houseId => $houseData): ?>
                 <?php if ($numberHouse>0): ?>
-                    <div class='col-8 navbar-light mt-5 p-3 rounded border border-3 h-100' style='background-color: #e3f2fd;'>
+                    <div class='col-lg-8 col-m-19 col-s-10 col-xs-11 navbar-light mt-5 p-3 rounded border border-3 h-100' style='background-color: #e3f2fd;'>
                         <div class='row justify-content-center mt-5'>
                             <div class='col-10'>
                                 <h3><?php echo $houseData['name']; ?></h3>
@@ -119,36 +120,69 @@
                                 </div>
                             </div>
                         </div>
-                        <?php foreach ($houseData['rooms'] as $roomId => $roomData): ?>
-                            <div class="mt-3 px-5 py-2 rounded border border-3">
-                                <div class='row  mt-2'>
-                                    <div class="col-3 ml-5 row">
-                                        <h4><?php echo $roomData['name']; ?></h4>
+                        <!--Wyświetlanie i obsługa pokoi-->
+                        <?php if (!empty($houseData['rooms'])): ?>
+                            <?php foreach ($houseData['rooms'] as $roomId => $roomData): ?>
+                                <div class="mt-3 px-5 py-2 rounded border border-3">
+                                    <div class='row  mt-2'>
+                                        <div class="col-2 ml-5">
+                                            <h4><?php echo $roomData['name']; ?></h4>
+                                        </div>
+                                        <div class="col-9 ml-5"></div>
+                                        <div class="col-1 ml-5">
+                                            <!--lista rozwijana dla pokoju-->
+                                                <button class="btn" type="button" id="dropdownMenuButtonRoom<?php echo $roomId; ?>" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="bi bi-sliders"></i>
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonRoom<?php echo $roomId; ?>">
+                                                    <a class="dropdown-item" href="edit_room.php?id_room=<?php echo $roomId; ?>">Edytuj</a>
+                                                    <a class="dropdown-item" href="../php_script/delete_room.php?id_room=<?php echo $roomId; ?>?id_domu=<?php echo $houseData['id_house']; ?>">Usuń</a>
+                                                    <a class="dropdown-item" href="info_room.php?id_room=<?php echo $roomId; ?>" >Informacje</a>
+                                                </div>
+                                        </div>
                                     </div>
-                                    <div class="col-3 ml-5 row"></div>
-                                    <div class="col-3 ml-5 row">
-                                        <form action="http://localhost/studia/SMARTHOME/strony/new_device.php" method="POST">
+                                    <!--wywietlanie i obsługa urządzeń-->
+                                    <?php if (!empty($roomData['devices'])): ?>
+                                        <?php foreach ($roomData['devices'] as $deviceData): ?>
+                                            <div class="mt-2 row">
+                                                <div class="col-3 p-2">   
+                                                    <?php echo $deviceData['name']; ?>
+                                                </div>
+                                                <div class="col-2 p-2">
+                                                    <div class="form-check form-switch">
+                                                        <input class="form-check-input" type="checkbox" id="deviceSwitch_<?php echo $deviceData['id'] ?>" onchange="toggleDeviceState(<?php echo $deviceData['id'] ?>)" <?php echo ($deviceData['stan'] == 1) ? "checked" : ""; ?>>
+                                                        <label class="form-check-label" for="deviceSwitch_<?php echo $deviceData['id'] ?>"></label>
+                                                    </div>
+                                                    
+                                                    <input type="hidden" id="deviceButton_<?php echo $deviceData['id']; ?>" onclick="toggleDeviceState(<?php echo $deviceData['id']; ?>)">
+                                                        <?php // echo ($device['stan'] == 1) ? "On" : "Off"; ?>
+                                                    </input>
+                                                </div>
+                                                <div class="col-2">
+                                                    <!-- Dodaj przycisk edycji, który uruchomi tryb edycji dla konkretnego urządzenia -->
+                                                    <a href="http://localhost/studia/SMARTHOME/php_script/delete_device.php?device_id=<?php echo $deviceData['id']; ?>" class="btn "><i class="bi bi-trash3"></i></a>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <div class='text-center my-5'>
+                                            <p class="h4">Brak urządzeń w pokoju</p>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="container">
+                                        <form action="http://localhost/studia/SMARTHOME/strony/new_device.php" method="GET">
                                             <input type="hidden" name="id_house" value="<?php echo $houseId; ?>">
-                                            <button class="btn btn-primary p-2" type="submit">Dodaj urządzenia</button>
+                                            <input type="hidden" name="id_room" value="<?php echo $roomId; ?>">
+                                            <button class="btn btn-primary" type="submit">+</button>
                                         </form>
                                     </div>
                                 </div>
-                                <?php if (!empty($roomData['devices'])): ?>
-                                    <ul>
-                                        <?php foreach ($roomData['devices'] as $deviceData): ?>
-                                            <li class="mt-2">
-                                                <?php echo $deviceData['name']; ?>
-                                                <button id="deviceButton_<?php echo $deviceData['id']; ?>" onclick="toggleDeviceState(<?php echo $deviceData['id']; ?>)">
-                                                    <?php echo ($deviceData['stan'] == 1) ? "On" : "Off"; ?>
-                                                </button>
-                                            </li>
-                                        <?php endforeach; ?>
-                                    </ul>
-                                <?php else: ?>
-                                    <p>Brak urządzeń w pokoju</p>
-                                <?php endif; ?>
-                            </div>
-                        <?php endforeach; ?>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <div class='text-center my-5'>
+                                    <p class="h4">Brak Pokoi</p>
+                                </div>
+                            <?php endif; ?>
                         <div class='row justify-content-center mt-4'>
                             <div class="col-4 justify-content-center row">
                                 <a class="btn btn-primary p-2" href="http://localhost/studia/SMARTHOME/strony/new_room.php">Dodaj pokój</a>
@@ -165,6 +199,7 @@
             <?php endforeach; ?>
         </div>
     </div>
+     <!--Za duża ilośc pokoi-->
     <?php if ($numberHouse<=5): ?>
         <div class="container mt-2">
             <div class="row justify-content-center mt-5">

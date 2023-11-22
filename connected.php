@@ -6,6 +6,8 @@ $database = "smarthome";
 
 $conn = new mysqli($host, $DBusername, $DBpassword, $database);
 
+header('Content-Type: text/html; charset=UTF-8');
+
 if ($conn->connect_error) {
     // Błąd połączenia, wyświetl komunikat
     echo "Błąd połączenia z bazą danych: " . $conn->connect_error;

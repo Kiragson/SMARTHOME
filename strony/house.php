@@ -173,7 +173,7 @@
                                         <form action="http://localhost/studia/SMARTHOME/strony/new_device.php" method="GET">
                                             <input type="hidden" name="id_house" value="<?php echo $houseId; ?>">
                                             <input type="hidden" name="id_room" value="<?php echo $roomId; ?>">
-                                            <button class="btn btn-primary" type="submit">+</button>
+                                            <button class="btn btn-primary" type="submit"><i class="bi bi-plus-circle"></i></button>
                                         </form>
                                     </div>
                                 </div>
@@ -220,7 +220,6 @@
         socket.onopen = function (event) {
             console.log("Połączono z serwerem WebSocket.");
         };
-
         // Obsługa zdarzenia po otrzymaniu wiadomości od serwera WebSocket
         socket.onmessage = function (event) {
             var response = JSON.parse(event.data);

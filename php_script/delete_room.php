@@ -119,6 +119,6 @@ if (isset($_GET['id_room'])) {
     //echo json_encode($response);
     //exit();
 }
-header("Location: {$_SERVER['HTTP_REFERER']}");
+header("Location: ../house.php");
 exit;
 ?>

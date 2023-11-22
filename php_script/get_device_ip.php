@@ -1,21 +1,15 @@
-<?php 
-// Połączenie z bazą danych (jeśli jest używane)
- // Zakładam, że "connected.php" zawiera kod do nawiązania połączenia z bazą danych
+<?php
 
-// Odczytaj parametr device_id z zapytania
 $device_id = isset($_GET['device_id']) ? intval($_GET['device_id']) : null;
 
 if ($device_id === null) {
     // Błąd - brak lub nieprawidłowy parametr device_id
     $response = array('success' => false, 'message' => 'Brak lub nieprawidłowy parametr device_id');
 } else {
-    // Przygotuj zapytanie SQL z użyciem zabezpieczeń przed SQL Injection (PDO)
     require_once("../connected.php");
-    $sql = "SELECT state FROM device WHERE id = :device_id";
+    $sql = "SELECT ip FROM device WHERE id = :device_id";
 
-    // Przygotuj i wykonaj zapytanie
     try {
-
         $pdo = new PDO("mysql:host=localhost;dbname=smarthome", "witryna", "zaq1@WSX");
         $stmt = $pdo->prepare($sql);
         $stmt->bindParam(':device_id', $device_id, PDO::PARAM_INT);
@@ -23,20 +17,20 @@ if ($device_id === null) {
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($result) {
-            $device_state = $result['state'];
-            // Tutaj masz stan urządzenia
+            $device_ip = $result['ip']; // Poprawiam na 'device_ip'
+            // Tutaj masz ip urządzenia
         } else {
             // Urządzenie o podanym ID nie istnieje
             $response = array('success' => false, 'message' => 'Urządzenie o podanym ID nie istnieje');
         }
     } catch (PDOException $e) {
         // Obsługa błędu związana z bazą danych
-        $response = array('success' => false, 'message' => 'Błąd bazy danych: ' . $e->getMessage());
+        $response = array('success' => false, 'message' => 'Blad bazy danych: ' . $e->getMessage());
     }
 
     // Jeśli wszystko jest w porządku, przygotuj odpowiedź JSON
     if (!isset($response)) {
-        $response = array('success' => true, 'device_id' => $device_id, 'state' => $device_state);
+        $response = array('success' => true, 'device_id' => $device_id, 'ip' => $device_ip);
     }
 }
 

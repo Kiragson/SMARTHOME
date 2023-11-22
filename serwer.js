@@ -18,19 +18,19 @@ wss.on('connection', (ws) => {
     
         try {
             // Wywołaj logikę do zmiany stanu urządzenia
-            updateDeviceStateInDatabase(device_id);
-    
+            updateDeviceState(device_id)
+
             // Przygotuj wiadomość JSON do przesłania
             const response = JSON.stringify({
                 success: true,
                 device_id: device_id,
             });
-    
+            console.log('wiadomosc');
             // Wyślij wiadomość z potwierdzeniem klientowi
             ws.send(response);
     
             // Powiadom innych klientów o zmianie stanu
-            //broadcastDeviceStateChange(device_id, state);
+            broadcastDeviceStateChange(device_id, state);
         } catch (error) {
             // Obsłuż błąd z funkcji updateDeviceStateInDatabase
             console.error("Serwer.js/36: Wystąpił błąd - " + error.message);
@@ -66,16 +66,70 @@ function broadcastDeviceStateChange(device_id, new_state) {
 }
 
 const axios = require('axios');
+async function updateDeviceState(device_id){
+    const result = await updateDeviceStateFizical(device_id);
 
-function updateDeviceStateInDatabase(device_id) {
-    // Przygotuj dane do wysłania na serwer
-    
-    var deviceid= new FormData();
-    deviceid.append("device_id",device_id);
+        if (result.success) {
+            updateDeviceStateInDatabase(device_id);
+        } else {
+            console.error(result.message);
+        }
+}
+async function updateDeviceStateFizical(device_id){
+    try{
+        // Pobierz adres IP urządzenia przy użyciu funkcji getDeviceIP
+        const deviceIP = await getDeviceIP(device_id);
+        if (deviceIP !== null) {
+            // W tym miejscu możesz używać deviceIP w funkcji updateDeviceStateInDatabase
+            const infoURL = `http://${deviceIP}/zeroconf/info`;
 
+            // Pobieramy stan urządzenia
+            const response = await fetch(infoURL);
+            const data = await response.json();
+            console.log('Odpowiedź z pobierania stanu urządzenia:', data);
+            const currentState = data.data.switch;
 
+            // Tworzymy link do wysłania zapytania
+            const switchURL = `http://${deviceIP}/zeroconf/switch`;
+
+            // Tworzymy dane JSON do wysłania
+            const requestData = {
+                deviceid: device_id,
+                data: {
+                    switch: currentState === 'on' ? 'off' : 'on'
+                }
+            };
+
+            // Wysyłamy zapytanie POST z danymi JSON
+            const switchResponse = await fetch(switchURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            const responseData = await switchResponse.json();
+            console.log('Odpowiedź z zapytania POST:', responseData)
+
+            // Teraz możesz używać deviceIP w dalszej części funkcji
+            console.log('Adres IP urządzenia:', deviceIP);
+
+            //zwóróć pozytywnie
+            return { success: true, message: 'Pomyślnie zaktualizowano stan urządzenia.' };
+        } else {
+            console.error('Błąd podczas pobierania adresu IP urządzenia.');
+        }
+    }
+    catch (error) {
+        // Obsługa błędów
+        console.error('Błąd podczas wykonywania funkcji updateDeviceStateInDatabase:', error);
+        return { success: false, message: 'Błąd w funkcji updateDeviceStateFizical.',error };
+    }
+}   
+async function updateDeviceStateInDatabase(device_id,device_state=null){
     //switch_device(responseData.newDeviceState, responseData.ip_address);
-    fetch('http://localhost/studia/SMARTHOME/php_script/update_device_state.php?device_id=' + device_id)
+    fetch('http://localhost/studia/SMARTHOME/php_script/update_device_state.php?device_id=' + device_id+'device_state='+device_state)
         .then(response => {
             // Check if the response status is OK (200)
             if (!response.ok) {
@@ -120,15 +174,84 @@ function updateDeviceStateInDatabase(device_id) {
             }
          });
 }
-function switch_device(stan, ip_address){
-    console.log(stan+" "+ip_address);
+async function getDeviceIP(device_id) {
+    try {
+        // Wywołaj plik get_device_ip.php przy użyciu metody fetch
+        const response = await fetch(`http://localhost/studia/SMARTHOME/php_script/get_device_ip.php?device_id=${device_id}`);
 
+        // Sprawdź, czy odpowiedź jest OK (200)
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
 
+        // Pobierz JSON z odpowiedzi
+        const data = await response.json();
+
+        // Pobierz wartość deviceIP z danych JSON
+        const deviceIP = data.deviceIP;
+
+        // Zwróć wartość deviceIP
+        return deviceIP;
+    } catch (error) {
+        // Obsługa błędów
+        console.error('Błąd podczas pobierania adresu IP urządzenia:', error);
+        return null;
+    }
+}
+async function getDeviceState(deviceIP, device_id) {
+    try {
+        const infoURL = `http://${deviceIP}/zeroconf/info`;
+
+        // Pobieramy stan urządzenia
+        const response = await fetch(infoURL);
+        const data = await response.json();
+        const currentState = data.data.switch;
+
+        // Aktualizujemy stan urządzenia w bazie danych
+        await updateDeviceStateInDatabase(device_id, currentState);
+
+        // Wyświetlamy stan urządzenia w konsoli
+        console.log(`Stan urządzenia ${device_id}: ${currentState}`);
+    } catch (error) {
+        // Obsługa błędów
+        console.error(`Błąd podczas pobierania stanu urządzenia ${device_id}:`, error);
+        await updateDeviceStateInDatabase(device_id, 3);
+        // Dodaj kod do obsługi utraty połączenia z urządzeniem
+        console.log(`Utracono połączenie z urządzeniem ${device_id}`);
+    }
+}
+async function startCommunicationWithDevices(deviceIds) {
+    // Uruchom stałą komunikację z każdym urządzeniem
+    deviceIds.forEach(device_id => {
+        getDeviceIP(device_id)
+            .then(deviceIP => {
+                if (deviceIP !== null) {
+                    // Uruchom funkcję getDeviceState cyklicznie co np. 5 sekund
+                    const intervalId = setInterval(() => {
+                        getDeviceState(deviceIP, device_id);
+                    }, 5000); // 5000 milisekund = 5 sekund
+
+                    // Zapisz intervalId w obiekcie, aby móc go później zatrzymać
+                    const communicationIntervals = communicationIntervals || {};
+                    communicationIntervals[device_id] = intervalId;
+
+                    console.log(`Rozpoczęto stałą komunikację z urządzeniem ${device_id}`);
+                } else {
+                    console.error(`Błąd podczas pobierania adresu IP urządzenia ${device_id}.`);
+                }
+            })
+            .catch(error => {
+                console.error(`Błąd podczas rozpoczynania stałej komunikacji z urządzeniem ${device_id}:`, error);
+            });
+    });
 }
 function handleError(errorMessage) {
-    // Informacja o błedzie
-    //console.error("Serwer.js Obsługa błedu: Wystąpił błąd - " + errorMessage);
+    console.error(errorMessage);
 }
+
+//const deviceIds = [3]; // Lista ID urządzeń
+//startCommunicationWithDevices(deviceIds);
+
 
 
 

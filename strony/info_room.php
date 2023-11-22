@@ -67,66 +67,72 @@ if (isset($_GET['id_room'])) {
     <div class="container">
         <div class='row justify-content-center mt-5'>
             <div class="col-8 navbar-light p-5 rounded h-100" style="background-color: #e3f2fd;">
-                
-                <h2> <?php echo $roomName; ?></h2>
-                <hr>
-                <h3>Urządzenia dostępne w pokoju</h3>
-                <div class="p-2 m-2">
-                    <?php if (count($devices) > 0) : ?>
-                        <?php foreach ($devices as $device): ?>
-                            <div class="mt-2 row">
-                                <div class="col-3">
-                                    <?php echo $device['deviceName']; ?>
-                                    <?php echo $device['ip']; ?>
-                                </div>
-                                <div class="col-2">
-                                </div>
-                                <div class="col-2">
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="deviceSwitch_<?php echo $device['deviceId']; ?>" onchange="toggleDeviceState(<?php echo $device['deviceId']; ?>)" <?php echo ($device['stan'] == 1) ? "checked" : ""; ?>>
-                                        <label class="form-check-label" for="deviceSwitch_<?php echo $device['deviceId']; ?>"></label>
-                                    </div>
-                                    
-                                    <input type="hidden" id="deviceButton_<?php echo $device['deviceId']; ?>" onclick="toggleDeviceState(<?php echo $device['deviceId']; ?>)">
-                                        <?php // echo ($device['stan'] == 1) ? "On" : "Off"; ?>
-                                    </input>
-                                </div>
-                                <div class="col-2">
-                                </div>
-                                <div class="col-2">
-                                    <!-- Dodaj przycisk edycji, który uruchomi tryb edycji dla konkretnego urządzenia -->
-                                    <a href="http://localhost/studia/SMARTHOME/php_script/delete_device.php?device_id=<?php echo $device['deviceId']; ?>" class="btn "><i class="bi bi-trash3"></i></a>
-                                    <button class="btn " onclick="editDevice(<?php echo $device['deviceId']; ?>)"><i class="bi bi-pen-fill"></i></button>
-                                </div>
-                            </div>
-                            <div class="pt-4" id="editForm_<?php echo $device['deviceId']; ?>" style="display: none;">
-                                <form action="http://localhost/studia/SMARTHOME/php_script/update_device.php" method="POST">
-                                    <label for="editDeviceName">Nowa:</label>
-                                    <input type="text" id="editDeviceName_<?php echo $device['deviceId']; ?>" value="<?php echo $device['deviceName']; ?>">
-
-                                    <label for="editDeviceIp">Adres IP:</label>
-                                    <input type="text" id="editDeviceIp_<?php echo $device['deviceId']; ?>" value="<?php echo $device['ip']; ?>">
-
-                                    <button class="btn btn-primary p-2"  type="submit"> Zapisz zmiany</button>
-                                    <button class="btn btn-secondary p-2" onclick="cancelEdit(<?php echo $device['deviceId']; ?>)">Anuluj</button>
-                                </form>
-                            </div>
-                            <hr>
-                        <?php endforeach; ?>
-
-                    <?php else : ?>
-                        <p>Brak urządzeń w pokoju.</p>
-                    <?php endif; ?>
-                    <div>
-                        <form action="http://localhost/studia/SMARTHOME/strony/new_device.php" method="GET">
-                            <input type="hidden" name="id_house" value="<?php echo $houseId; ?>">
-                            <input type="hidden" name="id_room" value="<?php echo $id_pokoju; ?>">
-                            <button class="btn btn-primary" type="submit">+</button>
-                        </form>
+                <div class="row">
+                    <div class="col-2"><h2> <?php echo $roomName; ?></h2></div>
+                    <div class="col-8"></div>
+                    <div class="col-2">
+                        <a href="http://localhost/studia/SMARTHOME/php_script/delete_room.php?id_room=<?php echo $id_pokoju; ?>" class="btn "><i class="bi bi-trash3"></i></a>
+                        <a href="http://localhost/studia/SMARTHOME/php_script/update_room.php?room_id=<?php echo $id_pokoju; ?>"class="btn " ><i class="bi bi-pen-fill"></i></a>
                     </div>
                 </div>
+                <hr>
+                <div class="container border-top border-2 border-dark">
+                    <h3>Urządzenia dostępne w pokoju</h3>
+                    <div class="p-2 m-2">
+                        <?php if (count($devices) > 0) : ?>
+                            <?php foreach ($devices as $device): ?>
+                                <div class="container mt-2 row">
+                                    <div class="col-2">
+                                        <!-- Nazwa -->
+                                        <?php echo $device['deviceName']; ?>
+                                        <?php echo $device['ip']; ?>
+                                    </div>
+                                    <div class="col-2">
+                                    </div>
+                                    <div class="col-2">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="deviceSwitch_<?php echo $device['deviceId']; ?>" onchange="toggleDeviceState(<?php echo $device['deviceId']; ?>)" <?php echo ($device['stan'] == 1) ? "checked" : ""; ?>>
+                                            <label class="form-check-label" for="deviceSwitch_<?php echo $device['deviceId']; ?>"></label>
+                                        </div>
+                                        <input type="hidden" id="deviceButton_<?php echo $device['deviceId']; ?>" onclick="toggleDeviceState(<?php echo $device['deviceId']; ?>)">
+                                            <?php // echo ($device['stan'] == 1) ? "On" : "Off"; ?>
+                                        </input>
+                                    </div>
+                                    
+                                    <div class="col-2">
+                                    </div>
+                                    <div class="col-2">
+                                        <!-- Dodaj przycisk edycji, który uruchomi tryb edycji dla konkretnego urządzenia -->
+                                        <a href="http://localhost/studia/SMARTHOME/php_script/delete_device.php?device_id=<?php echo $device['deviceId']; ?>" class="btn "><i class="bi bi-trash3"></i></a>
+                                        <button class="btn " onclick="editDevice(<?php echo $device['deviceId']; ?>)"><i class="bi bi-pen-fill"></i></button>
+                                    </div>
+                                </div>
+                                <div class="pt-4" id="editForm_<?php echo $device['deviceId']; ?>" style="display: none;">
+                                    <form action="http://localhost/studia/SMARTHOME/php_script/update_device.php" method="POST">
+                                        <label for="editDeviceName">Nowa:</label>
+                                        <input type="text" id="editDeviceName_<?php echo $device['deviceId']; ?>" value="<?php echo $device['deviceName']; ?>">
 
-                
+                                        <label for="editDeviceIp">Adres IP:</label>
+                                        <input type="text" id="editDeviceIp_<?php echo $device['deviceId']; ?>" value="<?php echo $device['ip']; ?>">
+
+                                        <button class="btn btn-primary p-2"  type="submit"> Zapisz zmiany</button>
+                                        <button class="btn btn-secondary p-2" onclick="cancelEdit(<?php echo $device['deviceId']; ?>)">Anuluj</button>
+                                    </form>
+                                </div>
+                                <hr>
+                            <?php endforeach; ?>
+                        <?php else : ?>
+                            <p>Brak urządzeń w pokoju.</p>
+                        <?php endif; ?>
+                        <div>
+                            <form action="http://localhost/studia/SMARTHOME/strony/new_device.php" method="GET">
+                                <input type="hidden" name="id_house" value="<?php echo $houseId; ?>">
+                                <input type="hidden" name="id_room" value="<?php echo $id_pokoju; ?>">
+                                <button class="btn btn-primary" type="submit"><i class="bi bi-plus-circle"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -147,30 +153,30 @@ if (isset($_GET['id_room'])) {
                 flag=0;
             }
         
-    }
+        }
 
-    // Funkcja do anulowania edycji
-    function cancelEdit(device_id) {
-        // Wyświetl ponownie przyciski
-        document.getElementById('deviceButton_' + device_id).style.display = 'block';
-        document.getElementById('deviceSwitch_' + device_id).style.display = 'block';
+        // Funkcja do anulowania edycji
+        function cancelEdit(device_id) {
+            // Wyświetl ponownie przyciski
+            document.getElementById('deviceButton_' + device_id).style.display = 'block';
+            document.getElementById('deviceSwitch_' + device_id).style.display = 'block';
 
-        // Ukryj formularz edycji
-        document.getElementById('editForm_' + device_id).style.display = 'none';
-    }
+            // Ukryj formularz edycji
+            document.getElementById('editForm_' + device_id).style.display = 'none';
+        }
 
-    // Funkcja do zapisywania zmian
-    function saveDeviceChanges(device_id) {
-        // Pobierz nowe wartości z formularza
-        var newName = document.getElementById('editDeviceName_' + device_id).value;
-        var newIp = document.getElementById('editDeviceIp_' + device_id).value;
+        // Funkcja do zapisywania zmian
+        function saveDeviceChanges(device_id) {
+            // Pobierz nowe wartości z formularza
+            var newName = document.getElementById('editDeviceName_' + device_id).value;
+            var newIp = document.getElementById('editDeviceIp_' + device_id).value;
 
-        // Tutaj możesz przekazać te dane do serwera za pomocą żądania AJAX, aby zaktualizować bazę danych
+            // Tutaj możesz przekazać te dane do serwera za pomocą żądania AJAX, aby zaktualizować bazę danych
 
-        // Aktualizuj dane na stronie
-        document.getElementById('deviceButton_' + device_id).innerHTML = newName;
-        document.getElementById('editForm_' + device_id).style.display = 'none'; // Ukryj formularz po zapisaniu zmian
-    }
+            // Aktualizuj dane na stronie
+            document.getElementById('deviceButton_' + device_id).innerHTML = newName;
+            document.getElementById('editForm_' + device_id).style.display = 'none'; // Ukryj formularz po zapisaniu zmian
+        }
         var socket = new WebSocket("ws://localhost:8080");
         // Obsługa zdarzenia po nawiązaniu połączenia WebSocket
         socket.onopen = function (event) {

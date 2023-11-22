@@ -1,5 +1,7 @@
 <?php
 // Włącz obsługę sesji, jeśli jeszcze nie jest włączona
+header('Content-Type: text/html; charset=UTF-8');
+
 session_start();
 
 // Inicjalizacja tablicy do przechowywania odpowiedzi
@@ -13,8 +15,11 @@ require_once("../connected.php");
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $deviceId = $_GET['device_id'];
+    $device_state = isset($_GET['device_state']) ? $_GET['device_state'] : null;
+    echo $device_state;
     error_log($deviceId);
 }
+echo $device_state;
 if(isset($deviceId))
 {
         // Pobierz bieżący stan urządzenia z bazy danych
@@ -27,8 +32,17 @@ if(isset($deviceId))
     $stmt->fetch();
     $stmt->close();
 
-    // Odwróć bieżący stan urządzenia (zmień 0 na 1 i odwrotnie)
-    $newDeviceState = ($currentDeviceState == 0) ? 1 : 0;
+    
+    if($device_state==Null){
+        $newDeviceState = ($currentDeviceState == 0) ? 1 : 0;
+    }
+    else if($device_state==3){
+
+        $newDeviceState = $device_state;
+    }
+    else if($device_state==1){
+        $newDeviceState=$currentDeviceState;
+    }
 
     // Przygotuj zapytanie SQL, aby zaktualizować stan urządzenia
     $updateSql = "UPDATE device SET state = ? WHERE id = ?";
@@ -40,7 +54,7 @@ if(isset($deviceId))
         // Zaktualizowano stan urządzenia pomyślnie
         $response['success'] = true;
         $response['message'] = "update_device_state.php: Stan urządzenia został zaktualizowany.";
-        //$response['newDeviceState'] = $newDeviceState; // Nowy stan urządzenia
+        $response['newDeviceState'] = $newDeviceState; // Nowy stan urządzenia
     } else {
         // Błąd podczas aktualizacji stanu urządzenia
         $response['success'] = false;

@@ -8,7 +8,7 @@ if (!isset($_SESSION['username'])) {
 
 $login = $_SESSION['user_id'];
 
-require_once("../connected.php"); // Sprawdź ścieżkę do pliku connected.php
+require_once("../connected.php");
 // Zapytanie SQL do pobrania wiadomości
 $sql = "SELECT date, message FROM messages WHERE user_id = ?";
 $stmt = $conn->prepare($sql);
@@ -51,7 +51,7 @@ $conn->close();
                 </thead>
                 <tbody>
                 <?php
-                    // Generujemy HTML na podstawie pobranych danych
+                    
                     $id = 1;
                     foreach ($data as $message) {
                         echo '<tr>';

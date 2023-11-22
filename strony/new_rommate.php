@@ -1,59 +1,59 @@
 <?php
 
-session_start();
+    session_start();
 
-$response = array(); // Tworzymy pusty tablicę na odpowiedź
+    $response = array(); // Tworzymy pusty tablicę na odpowiedź
 
-if (isset($_GET['id_domu'])) {
-    $id_domu = $_GET['id_domu'];
+    if (isset($_GET['id_domu'])) {
+        $id_domu = $_GET['id_domu'];
 
-    // Połączenie z bazą danych (zakładam, że masz już skonfigurowane połączenie)
-    require_once("../connected.php");
+        // Połączenie z bazą danych (zakładam, że masz już skonfigurowane połączenie)
+        require_once("../connected.php");
 
-    // Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
-    $sql = "SELECT h.name, h.city,h.postcode, h.family_id, f.user1, f.user2, f.user3, f.user4, f.user5, f.user6
-        FROM House h 
-        LEFT JOIN Family f ON f.id = h.family_id
-        WHERE h.id = ?";
-    // Przygotuj zapytanie SQL
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id_domu);
+        // Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
+        $sql = "SELECT h.name, h.city,h.postcode, h.family_id, f.user1, f.user2, f.user3, f.user4, f.user5, f.user6
+            FROM House h 
+            LEFT JOIN Family f ON f.id = h.family_id
+            WHERE h.id = ?";
+        // Przygotuj zapytanie SQL
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $id_domu);
 
-    $stmt->execute();
-    $result = $stmt->get_result();
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-    $housesinfo="";
+        $housesinfo="";
 
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc(); // Pobierz dane do tablicy $row
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc(); // Pobierz dane do tablicy $row
 
-        $houseCity = $row['city'];        
-        $zipcode=$row['postcode'];
-        $houseName = $row['name'];
-        $familyId = $row['family_id'];
-        $user1 = $row['user1'];
-        $user2 = $row['user2'];
-        $user3 = $row['user3'];
-        $user4 = $row['user4'];
-        $user5 = $row['user5'];
-        $user6 = $row['user6'];
+            $houseCity = $row['city'];        
+            $zipcode=$row['postcode'];
+            $houseName = $row['name'];
+            $familyId = $row['family_id'];
+            $user1 = $row['user1'];
+            $user2 = $row['user2'];
+            $user3 = $row['user3'];
+            $user4 = $row['user4'];
+            $user5 = $row['user5'];
+            $user6 = $row['user6'];
+        }
+
+
+        $conn->close();
+
+
+    }else{
+        header('Location: http://localhost/studia/SMARTHOME/404.html');
     }
-
-
-    $conn->close();
-
-
-}else{
-    header('Location: http://localhost/studia/SMARTHOME/404.html');
-}
-?>
+    ?>
 <!DOCTYPE html>
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edytuj <?php echo $houseName; ?></title>
+    <title>Nowy Współlokator</title>
     <?php include '../template/css.php'; ?>
     <?php include '../template/script.php'; ?>
     <script>
@@ -90,7 +90,7 @@ if (isset($_GET['id_domu'])) {
         <div class='row justify-content-center mt-5'>
             <div class="col-8 navbar-light p-5 rounded h-100" style="background-color: #e3f2fd;">
                 <h1>Informacje <?php echo $houseName; ?></h1>
-                <form action="../php_script/ad_rommate.php" method="POST">
+                <form action="../php_script/add_rommate.php" method="POST">
                     <div class="p-2 m-2">
                         <p>Miasto: <?php if (isset( $houseCity)){echo $houseCity; echo ' ';}else{echo 'Brak';} ?><?php if (isset( $zipcode)){echo $zipcode;}else{echo '   -   ';} ?> </p>
                     </div>

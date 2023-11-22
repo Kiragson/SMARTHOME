@@ -1,57 +1,57 @@
 <?php
-session_start();
+    session_start();
 
-$response = array(); // Tworzymy pusty tablicę na odpowiedź
+    $response = array(); // Tworzymy pusty tablicę na odpowiedź
 
-if (isset($_GET['id_room'])) {
-    $user_id = $_SESSION['user_id'];
-    $id_pokoju = $_GET['id_room'];
+    if (isset($_GET['id_room'])) {
+        $user_id = $_SESSION['user_id'];
+        $id_pokoju = $_GET['id_room'];
 
-    // Połączenie z bazą danych (zakładam, że masz już skonfigurowane połączenie)
-    require_once("../connected.php");
+        // Połączenie z bazą danych (zakładam, że masz już skonfigurowane połączenie)
+        require_once("../connected.php");
 
-    // Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
-    $sql = "SELECT R.name as roomName, d.name as deviceName, d.ip,d.id as deviceID, state,h.id as house_id
-            FROM Room R 
-            LEFT JOIN house h ON h.id=r.house_id
-            LEFT JOIN device d ON R.id = d.room_id
-            WHERE R.id = ?";
-    // Przygotuj zapytanie SQL
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $id_pokoju);
+        // Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
+        $sql = "SELECT R.name as roomName, d.name as deviceName, d.ip,d.id as deviceID, state,h.id as house_id
+                FROM Room R 
+                LEFT JOIN house h ON h.id=r.house_id
+                LEFT JOIN device d ON R.id = d.room_id
+                WHERE R.id = ?";
+        // Przygotuj zapytanie SQL
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $id_pokoju);
 
-    $stmt->execute();
-    $result = $stmt->get_result();
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-    $devices = array(); // Przygotowujemy tablicę na informacje o urządzeniach
+        $devices = array(); // Przygotowujemy tablicę na informacje o urządzeniach
 
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $roomName = $row['roomName'];
-            $deviceName = $row['deviceName'];
-            $ip = $row['ip'];
-            $deviceId=$row['deviceID'];
-            $state=$row['state'];
-            $houseId=$row['house_id'];
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $roomName = $row['roomName'];
+                $deviceName = $row['deviceName'];
+                $ip = $row['ip'];
+                $deviceId=$row['deviceID'];
+                $state=$row['state'];
+                $houseId=$row['house_id'];
 
-            // Dodaj informacje o urządzeniu do tablicy
-            $devices[] = array('deviceName' => $deviceName,'deviceId'=>$deviceId, 'ip' => $ip, 'stan'=>$state);
+                // Dodaj informacje o urządzeniu do tablicy
+                $devices[] = array('deviceName' => $deviceName,'deviceId'=>$deviceId, 'ip' => $ip, 'stan'=>$state);
+            }
+
+            $stmt->close(); // Zamknij statement
+
+            $conn->close(); // Zamknij połączenie
+        } else {
+            // Dodaj obsługę braku wyników
+            header('Location: http://localhost/studia/SMARTHOME/404.html');
+            exit();
         }
-
-        $stmt->close(); // Zamknij statement
-
-        $conn->close(); // Zamknij połączenie
     } else {
-        // Dodaj obsługę braku wyników
+        // Dodaj obsługę braku parametru id_room
         header('Location: http://localhost/studia/SMARTHOME/404.html');
         exit();
     }
-} else {
-    // Dodaj obsługę braku parametru id_room
-    header('Location: http://localhost/studia/SMARTHOME/404.html');
-    exit();
-}
-?>
+    ?>
 
 <!DOCTYPE html>
 <html lang="pl">

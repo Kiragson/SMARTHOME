@@ -5,24 +5,21 @@ if (!isset($_SESSION['username'])) {
     header('Location: login.php');
     exit;
 }
+
 require_once("../connected.php");
+
 if (isset($_GET['error'])) {
     $errorMessage = urldecode($_GET['error']);
     echo "<script>alert('$errorMessage');</script>";
 }
-if (isset($_GET['id_house'])){
+
+if (isset($_GET['id_house'])) {
     $idHouse = $_GET['id_house'];
 
-    
     // Sprawdź, czy parametr id_house został przekazany w adresie URL
-
     $sql = "SELECT name FROM house WHERE id = ?";
-
-    // Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $idHouse);
-
-    // Wykonaj zapytanie SQL
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -30,11 +27,7 @@ if (isset($_GET['id_house'])){
     if ($result) {
         // Pobieramy wynik z zapytania
         $row = $result->fetch_assoc();
-
-        // Pobieramy nazwę domu
         $houseName = $row['name'];
-
-        // Możesz teraz wykorzystać zmienną $houseName, która zawiera nazwę domu
     } else {
         echo "Błąd w zapytaniu: " . $conn->error;
     }
@@ -56,7 +49,6 @@ if (isset($_GET['id_house'])){
 } else {
     echo "Brak przekazanego id_house.";
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -64,52 +56,71 @@ if (isset($_GET['id_house'])){
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Nowe urządzenie</title>
     <?php include '../template/css.php'; ?>
     <?php include '../template/script.php'; ?>
 </head>
 <body>
-    <div class="container">
-        <div class='row justify-content-center mt-5'>
-            <div class='col-8 navbar-light mt-5 p-3 rounded border border-3 h-100' style='background-color: #e3f2fd;'>
-                <div class="mb-3">
-                    <h3>Nowe urządzenie</h3>
-                </div>
-                <form action="http://localhost/studia/SMARTHOME/php_script/device.php" method="POST" id="add_device-form">
-                <div class='row justify-content-center mt-5'>
-                    <div class="mb-3">
-                        <label for="name_device" class="form-label">Nazwa</label>
-                        <input type="text" class="form-control" id="name_device" name="name_device" aria-describedby="text">
-                    </div>
-                    <div class="mb-3">
-                        <label for="Ip_address" class="form-label">Adres IP:</label>
-                        <input type="text" class="form-control" id="ip_adres" name="ip_adres" aria-describedby="text" required>
-                        <small class="text-muted">Podaj poprawny adres IP (IPv4).</small>
-                    </div>
-                    <div class="mb-3">
-                        <input type="hidden" name="id_house" value="<?php echo $idHouse; ?>">
-                        <input type="hidden" name="stan" value="0">
-                    </div>
-                    <div class="mb-3">
-                        <label for="room" class="form-label">Wybierz pokój:</label>
-                        <select class="form-select" name="room" id="room">
-                            <?php foreach ($rooms as $room): ?>
-                                <option value="<?php echo $room['id']; ?>"><?php echo $room['name']; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
 
-                </div>
-                <div class='row justify-content-center mt-5'>
-                    <div class="col-4 justify-content-center row">
-                        <input type="hidden" name="method" value="addDevice">
-                        <button class="btn btn-primary p-2"  type="submit">Dodaj Urządzenie</button>
+<div class="container">
+    <div class='row justify-content-center mt-5'>
+        <div class='col-8 navbar-light mt-5 p-3 rounded border border-3 h-100' style='background-color: #e3f2fd;'>
+            <div class="mb-3">
+                <h3>Nowe urządzenie</h3>
+            </div>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDeviceModal">
+                Dodaj Urządzenie
+            </button>
+
+            <!-- Modal -->
+            <div class="modal fade" id="addDeviceModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Dodaj nowe urządzenie</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="http://localhost/studia/SMARTHOME/php_script/device.php" method="POST" id="add_device-form">
+                                <div class='row justify-content-center mt-5'>
+                                    <div class="mb-3">
+                                        <label for="name_device" class="form-label">Nazwa</label>
+                                        <input type="text" class="form-control" id="name_device" name="name_device" aria-describedby="text">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="Ip_address" class="form-label">Adres IP:</label>
+                                        <input type="text" class="form-control" id="ip_adres" name="ip_adres" aria-describedby="text" required>
+                                        <small class="text-muted">Podaj poprawny adres IP (IPv4).</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="hidden" name="id_house" value="<?php echo $idHouse; ?>">
+                                        <input type="hidden" name="stan" value="0">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="room" class="form-label">Wybierz pokój:</label>
+                                        <select class="form-select" name="room" id="room">
+                                            <?php foreach ($rooms as $room): ?>
+                                                <option value="<?php echo $room['id']; ?>"><?php echo $room['name']; ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class='row justify-content-center mt-5'>
+                                    <div class="col-4 justify-content-center row">
+                                        <input type="hidden" name="method" value="addDevice">
+                                        <button class="btn btn-primary p-2" type="submit">Dodaj Urządzenie</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-                </form>
             </div>
-        </div> 
+
+        </div>
     </div>
+</div>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const ipAddressInput = document.querySelector('#Ip_address');
@@ -163,6 +174,7 @@ if (isset($_GET['id_house'])){
 
             return true;
         }
+
         function checkConnection(ipAddress) {
             const img = new Image();
             img.src = `http://${ipAddress}`;
@@ -183,7 +195,6 @@ if (isset($_GET['id_house'])){
         }
 
     });
-
 </script>
 
 </body>

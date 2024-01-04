@@ -8,6 +8,7 @@ session_start();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" href="../img/logov2.png" type="image/x-icon">
     <title>Formularz Rejestracji</title>
 </head>
 <body>
@@ -15,7 +16,7 @@ session_start();
         <div class="row justify-content-center mt-5">
             <div class="col-8 navbar-light p-5 rounded h-100" style="background-color: #e3f2fd;">
                 <h2>Formularz Rejestracji</h2>
-                <form method="post" action="http://localhost/studia/SMARTHOME/php_script/rejestracja.php" id="registration-form">
+                <form method="post" action="http://localhost/studia/SMARTHOME/php_script/user.php" id="registration-form">
                     <div class="mb-3">
                         <label for="Login" class="form-label">Login:*</label>
                         <input type="text" class="form-control" id="Login" name="Login" aria-describedby="LoginHelp" placeholder="Login" required>
@@ -37,6 +38,7 @@ session_start();
                         </div>
                     </div>
                     <div class="mb-3">
+                        <input id="method" name="method" type="hidden" value="rejestracja" >
                         <button class="btn btn-warning rounded p-2 w-100 mb-3" type="submit">Rejestracja</button>
                         <a class="btn btn-light rounded p-2 w-100" href="login.php">Zaloguj</a>
                     </div>

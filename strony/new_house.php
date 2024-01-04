@@ -21,8 +21,7 @@ if ($result->num_rows > 0) {
     }
 }
 
-//var_dump($cityOptions);
-// Zamknij połączenie z bazą danych
+
 $conn->close();
 
 
@@ -45,7 +44,7 @@ $conn->close();
                 <div class="mb-3">
                     <h3>Nowy Dom</h3>
                 </div>
-                <form action="../php_script/add_home.php" method="POST" id="add_house-form">
+                <form action="../php_script/house.php" method="POST" id="add_house-form">
                     <div class='row justify-content-center mt-5'>
                         <div class="mb-3">
                             <label for="room_name" class="form-label">Nazwa domu</label>

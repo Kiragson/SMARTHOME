@@ -90,7 +90,6 @@
                     <p>Lokator: <?php if (isset($user5)) { echo $user5; } else { echo 'Brak'; } ?></p>
                     <p>Lokator: <?php if (isset($user6)) { echo $user6; } else { echo 'Brak'; } ?></p>
                 </div>
-                <!-- Przycisk do zmiany danych użytkownika -->
                 <div class="container">
                     <div class="row justify-content-center mt-5">
                         <div class="col-4">
@@ -99,7 +98,8 @@
                             </form>
                         </div>
                         <div class="col-4">
-                            <form action="usun.php?id_domu=<?php echo $id_domu; ?>" method="post">
+                            <form action="../php_script/house.php?id_domu=<?php echo $id_domu; ?>" method="post">
+                                <input type="hidden" name="rodzaj" id="rodzaj" value="delete">
                                 <button class="btn btn-warning rounded p-2 w-100"type="submit">Usuń</button>
                             </form>
                         </div>

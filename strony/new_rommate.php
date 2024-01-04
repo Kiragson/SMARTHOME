@@ -90,45 +90,29 @@
         <div class='row justify-content-center mt-5'>
             <div class="col-8 navbar-light p-5 rounded h-100" style="background-color: #e3f2fd;">
                 <h1>Informacje <?php echo $houseName; ?></h1>
-                <form action="../php_script/add_rommate.php" method="POST">
-                    <div class="p-2 m-2">
-                        <p>Miasto: <?php if (isset( $houseCity)){echo $houseCity; echo ' ';}else{echo 'Brak';} ?><?php if (isset( $zipcode)){echo $zipcode;}else{echo '   -   ';} ?> </p>
-                    </div>
-                    <h1>Współlokatorzy</h1>
-                    <div class="mb-3">
-                        <label for="" class="form-label">Lokator: </label>
-                        <input type="text" class="mb-1 form-control" id="user2" name="user2" placeholder="<?php if (isset($user2)) { echo $user2; } else { echo 'Dodaj lokatora'; } ?>" aria-describedby="emailHelp">
-                        <input type="text" class="mb-1 form-control" id="user3" name="user3" placeholder="<?php if (isset($user3)) { echo $user3; } else { echo 'Dodaj lokatora'; } ?>" aria-describedby="emailHelp">
-                        <input type="text" class="mb-1 form-control" id="user4" name="user4" placeholder="<?php if (isset($user4)) { echo $user4; } else { echo 'Dodaj lokatora'; } ?>" aria-describedby="emailHelp">
-                        <input type="text" class="mb-1 form-control" id="user5" name="user5" placeholder="<?php if (isset($user5)) { echo $user5; } else { echo 'Dodaj lokatora'; } ?>" aria-describedby="emailHelp">
-                        <input type="text" class="mb-1 form-control" id="user6" name="user6" placeholder="<?php if (isset($user6)) { echo $user6; } else { echo 'Dodaj lokatora'; } ?>" aria-describedby="emailHelp">
-                        <input type="hidden" name="family_id" id="family_id" value="$familyId">
-                    </div>
-                    <button class="btn btn-warning rounded p-2 w-100"type="submit">Zapisz zmiany</button>
-                </form>
+                <form action="../php_script/house.php" method="POST">
+                <div class="p-2 m-2">
+                    <p>Miasto: <?php if (isset($houseCity)) { echo $houseCity; echo ' '; } else { echo 'Brak'; } ?><?php if (isset($zipcode)) { echo $zipcode; } else { echo '   -   '; } ?></p>
+                </div>
+                <h1>Współlokatorzy</h1>
+                <div class="mb-3">
+                    <label for="user2" class="form-label">Lokator: </label>
+                    <input type="text" class="mb-1 form-control" id="user2" name="user2" value="<?php echo isset($user2) ? $user2 : 'Dodaj lokatora'; ?>" aria-describedby="emailHelp">
+                    <input type="text" class="mb-1 form-control" id="user3" name="user3" value="<?php echo isset($user3) ? $user3 : 'Dodaj lokatora'; ?>" aria-describedby="emailHelp">
+                    <input type="text" class="mb-1 form-control" id="user4" name="user4" value="<?php echo isset($user4) ? $user4 : 'Dodaj lokatora'; ?>" aria-describedby="emailHelp">
+                    <input type="text" class="mb-1 form-control" id="user5" name="user5" value="<?php echo isset($user5) ? $user5 : 'Dodaj lokatora'; ?>" aria-describedby="emailHelp">
+                    <input type="text" class="mb-1 form-control" id="user6" name="user6" value="<?php echo isset($user6) ? $user6 : 'Dodaj lokatora'; ?>" aria-describedby="emailHelp">
+                    <input type="hidden" name="family_id" id="family_id" value="<?php echo isset($familyId) ? $familyId : ''; ?>">
+                    <input type="hidden" name="rodzaj" id="rodzaj" value="new_roommate">
+                </div>
+                <button class="btn btn-warning rounded p-2 w-100" type="submit">Zapisz zmiany</button>
+            </form>
+
             </div>
         </div>
     </div>
     <script>
-    document.getElementById("postalCode").addEventListener("change", function() {
-        var selectedPostalCode = this.value;
-        var citySelect = document.getElementById("city");
-        citySelect.innerHTML = ""; // Wyczyść pole wyboru miasta
-
-       
-
-        
-        switch (selectedPostalCode) {
-            case '0':
-                alert('Błąd');
-                break;
-            <?php echo $cityOptions; ?>
-            default:
-                // W przypadku braku pasującej miejscowości, daj możliwość wpisania niestandardowej
-                citySelect.options.add(new Option("Inne", "Inne"));
-        }
-
-    });
+    
 </script>
 </body>
 </html>

@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="icon" href="../img/logov2.png" type="image/x-icon">
     <title>Formularz Logowania</title>
 </head>
 <body>
@@ -15,7 +16,7 @@
         <div class="row justify-content-center mt-5">
             <div class="col-8 navbar-light p-5 rounded h-100" style="background-color: #e3f2fd;">
                 <h2>Formularz Logowania</h2>
-                <form method="post" action="../php_script/logowanie.php" id="login-form">
+                <form method="post" action="../php_script/user.php" id="login-form">
                     <div class="mb-3">
                         <label for="exampleInputEmail1" class="form-label">Login:</label>
                         <input type="text" class="form-control" id="login" name="login" placeholder="Login lub Email" aria-describedby="emailHelp">
@@ -29,6 +30,7 @@
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>
+                        <input id="method" name="method" type="hidden" value="logowanie" >
                         <div id="passwordHelpBlock" class="form-text">
                             Your password must be 8-20 characters long, contain letters and numbers, and must not contain spaces, special characters, or emoji.
                         </div>

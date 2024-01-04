@@ -11,7 +11,7 @@ if (isset($_GET['id_domu'])) {
     require_once("../connected.php");
 
     // Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
-    $sql = "SELECT h.name, h.city, h.family_id, f.user1, f.user2, f.user3, f.user4, f.user5, f.user6
+    $sql = "SELECT h.name, h.city, h.postcode, h.family_id, f.user1, f.user2, f.user3, f.user4, f.user5, f.user6
         FROM House h 
         LEFT JOIN Family f ON f.id = h.family_id
         WHERE h.id = ?";
@@ -30,6 +30,7 @@ if (isset($_GET['id_domu'])) {
         $houseCity = $row['city']; // Poprawione pobieranie danych
         $houseName = $row['name'];
         $familyId = $row['family_id'];
+        $zipcode=$row['postcode'];
         $user1 = $row['user1'];
         $user2 = $row['user2'];
         $user3 = $row['user3'];
@@ -94,7 +95,7 @@ if (isset($_GET['id_domu'])) {
                         <label for="" class="form-label">Miasto: </label>
                         <input type="text" class="form-control" id="city" name="city" placeholder="<?php if (isset( $houseCity)){echo $houseCity;}else{echo 'Wpisz miasto';} ?>" aria-describedby="emailHelp">
                         <label for="postalCode" class="form-label">Kod pocztowy</label>
-                        <input type="text" class="form-control" id="postalCode" name="postalCode" placeholder="<?php if (isset( $houseCity)){echo $houseCity;}else{echo 'Wpisz miasto';} ?>" aria-describedby="emailHelp">
+                        <input type="text" class="form-control" id="postalCode" name="postalCode" placeholder="<?php if (isset( $zipcode)){echo $zipcode;}else{echo 'Wpisz Kod pocztowy';} ?>" aria-describedby="emailHelp">
                     </div>
                     <h1>Współlokatorzy</h1>
                     <div class="mb-3">

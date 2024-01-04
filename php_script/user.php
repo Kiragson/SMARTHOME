@@ -1,5 +1,6 @@
 <?php
 
+session_start();
 require_once("../connected.php");
 
 class Database
@@ -28,6 +29,7 @@ class Database
     {
         return $this->conn;
     }
+
     public function getError()
     {
         return $this->conn->error;
@@ -36,7 +38,14 @@ class Database
 
 class PasswordValidator
 {
-    public static function isValid($password)
+   
+}
+
+class UserManager
+{
+    private $database;
+
+    public function isValid($password)
     {
         $min_length = 8;
         $contains_lowercase = preg_match('/[a-z]/', $password);
@@ -46,15 +55,39 @@ class PasswordValidator
 
         return strlen($password) >= $min_length && $contains_lowercase && $contains_uppercase && $contains_digit && $contains_special_char;
     }
-}
-
-class UserManager
-{
-    private $database;
-
     public function __construct(Database $database)
     {
         $this->database = $database;
+    }
+
+    public function login($loginOrEmail, $password)
+    {
+        if (empty($loginOrEmail) || empty($password)) {
+            return "Proszę wypełnić wszystkie pola.";
+        }
+
+        // Sprawdzenie, czy loginOrEmail jest adresem email lub loginem
+        $field = filter_var($loginOrEmail, FILTER_VALIDATE_EMAIL) ? "email" : "login";
+
+        // Zapytanie do bazy danych
+        $query = "SELECT id, login, email, password FROM user WHERE $field = '$loginOrEmail'";
+        $result = $this->database->query($query);
+
+        if ($result->num_rows == 1) {
+            $row = $result->fetch_assoc();
+            if (password_verify($password, $row["password"])) {
+                // Poprawne logowanie
+                $_SESSION['zalogowany'] = true;
+                $_SESSION["username"] = $row["login"];
+                $_SESSION["user_id"] = $row["id"];
+                header("Location: http://localhost/studia/SMARTHOME/strony/konto.php");
+                exit;
+            } else {
+                return "Błędne hasło.";
+            }
+        } else {
+            return "Błędny login lub email.";
+        }
     }
 
     public function registerUser($email, $password, $login)
@@ -88,9 +121,8 @@ class UserManager
         if ($check_result->num_rows > 0) {
             return "Użytkownik o nazwie '$login' już istnieje.";
         }
-
         // Sprawdzenie, czy hasło spełnia warunki
-        if (!PasswordValidator::isValid($password)) {
+        if(!UserManager::isValid($password)) {
             return "Hasło jest niepoprawne. Upewnij się, że hasło zawiera co najmniej 8 znaków, małe i duże litery, przynajmniej jedną cyfrę i przynajmniej jeden znak specjalny.";
         }
 
@@ -109,21 +141,44 @@ class UserManager
     }
 }
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST["email"];
-    $password = $_POST["password"];
-    $login = $_POST["login"];
+$database = new Database("localhost", "smarthome", "witryna", "zaq1@WSX");
+$userManager = new UserManager($database);
 
-    $database = new Database("localhost", "smarthome", "witryna", "zaq1@WSX");
-    $userManager = new UserManager($database);
 
-    $errorMessage = $userManager->registerUser($email, $password, $login);
+if ($_SERVER["REQUEST_METHOD"] == "POST"){
 
-    if ($errorMessage) {
-        header("Location: http://localhost/studia/SMARTHOME/strony/register.php?error_message=" . urlencode($errorMessage));
-        exit;
-    }
+    $rodzaj=$_POST["method"];
+    
 }
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $login = $_POST["login"];
+    $password = $_POST["password"];
+    $rodzaj=$_POST["method"];
+    if(isset($_POST["email"])){
+        $email = $_POST["email"];
+    }
+
+    if($rodzaj=="logowanie"){
+        $errorMessage = $userManager->login($login, $password);
+        if ($errorMessage) {
+            header("Location: http://localhost/studia/SMARTHOME/strony/login.php?error=" . urlencode($errorMessage));
+            exit;
+        }
+    }
+    else if($rodzaj=="rejestracja"){
+        
+        $errorMessage = $userManager->registerUser($email, $password, $login);
+
+        if ($errorMessage) {
+            header("Location: http://localhost/studia/SMARTHOME/strony/register.php?error_message=" . urlencode($errorMessage));
+            exit;
+        }
+    }
+
+    
+}
+
+
 
 $database->close();
 ?>

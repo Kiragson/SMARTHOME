@@ -7,18 +7,11 @@
     }
     require_once("../connected.php");
 
-    // Pobierz listę miast z bazy danych
-    $sql = "SELECT PostalCode, CityName FROM Cities";
-    $result = $conn->query($sql);
-
-    // Utwórz listę opcji dla miast
-    $cityOptions = '';
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $postalCode = $row["PostalCode"];
-            $cityName = $row["CityName"];
-            $cityOptions .= "case '$postalCode': citySelect.options.add(new Option('$cityName', '$cityName')); break;";
-        }
+    if (isset($_GET['error'])) {
+        $errorMessage = urldecode($_GET['error']);
+        echo "<script>alert('$errorMessage');</script>";
+        header('Location: http://localhost/studia/SMARTHOME/strony/house.php');
+        exit;
     }
     
     // Pobierz zalogowanego użytkownika (zakładamy, że masz mechanizm uwierzytelniania)
@@ -115,7 +108,7 @@
                         <!--nagłówek-->
                         <div class='row justify-content-center mt-5'>
                             <div class='col-10'>
-                                <h3><?php echo $houseData['name']; ?></h3>
+                                <h3><?php echo $houseData['name']; ?></h3><?php echo $houseData['id_house']; ?>
                             </div>
                             <div class="col-1 dropdown">
                                 <button class="btn" type="button" id="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>" data-bs-toggle="dropdown" aria-expanded="false">
@@ -123,7 +116,7 @@
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>">
                                     <a class="dropdown-item" href="edit_house.php?id_domu=<?php echo $houseData['id_house']; ?>">Edytuj</a>
-                                    <button class="dropdown-item btn" onclick="confirmHouseDelete('<?php echo $houseData['id_house']; ?>', '<?php echo $houseData['name']; ?>');">Usuń</button>
+                                    <a class="dropdown-item" href="../php_script/house.php?id_domu=<?php echo $houseData['id_house']; ?>">Usuń</a>
                                     <a class="dropdown-item" href="info_house.php?id_domu=<?php echo $houseData['id_house']; ?>" >Informacje</a>
                                 </div>
                             </div>
@@ -176,11 +169,11 @@
                                     <?php endif; ?>
                                     <!--new device Button-->
                                     <div class="container">
-                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDeviceModalRoom_<?php echo $roomId; ?>" data-roomid="<?php echo $roomId; ?>">
+                                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDeviceModalRoom_<?php echo $roomId; ?>">
                                             <i class="bi bi-plus-circle"></i>
                                         </button>
                                     </div>
-
+                                    
                                     <!--modal addDevice-->
                                     <div class="modal fade" id="addDeviceModalRoom_<?php echo $roomId; ?>" tabindex="-1" aria-labelledby="add_device_label" aria-hidden="true">
                                         <div class="modal-dialog">
@@ -190,7 +183,7 @@
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <form id="add_device-form" data-roomid="<?php echo $roomId; ?>">
+                                                    <form action="http://localhost/studia/SMARTHOME/php_script/device.php" method="POST" id="add_device-form">
                                                         <div class='row justify-content-center mt-5'>
                                                             <div class="mb-3">
                                                                 <label for="name_device" class="form-label">Nazwa</label>
@@ -201,10 +194,14 @@
                                                                 <input type="text" class="form-control" id="ip_adres" name="ip_adres" aria-describedby="text" required>
                                                                 <small class="text-muted">Podaj poprawny adres IP (IPv4).</small>
                                                             </div>
-                                                            <input type="hidden" name="id_house" value="<?php echo $houseId ?>">
-                                                            <input type="hidden" name="stan" value="0">
-                                                            <input type="hidden" name="id_room" value="<?php echo $roomId; ?>">
-                                                            <input type="hidden" name="stan" value="0">
+                                                            <div class="mb-3">
+                                                                <input type="hidden" name="id_house" value="<?php echo $houseData['id_house']; ?>">
+                                                                <input type="hidden" name="stan" value="0">
+                                                            </div>
+                                                            <div class="mb-3">
+                                                                <input type="text" name="id_room" value="<?php echo $roomId; ?>">
+                                                                <input type="hidden" name="stan" value="0">
+                                                            </div>
                                                         </div>
                                                         <div class='row justify-content-center mt-5'>
                                                             <div class="col-4 justify-content-center row">
@@ -217,7 +214,6 @@
                                             </div>
                                         </div>
                                     </div>
-
                                 </div>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -228,15 +224,14 @@
                         <!--new room button-->
                         <div class='row justify-content-center mt-4'>
                             <div class="col-4 justify-content-center">
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal" data-houseid="<?php echo $houseData['id_house']; ?>">
-                                    Dodaj pokój
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModalHouseId_<?php echo $houseData['id_house']; ?>">
+                                    <i class="bi bi-plus-circle"></i>
                                 </button>
-
                             </div>
                             
                         </div>
                         <!--formularz dodawania pokoju-->
-                        <div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
+                        <div class="modal fade" id="addRoomModalHouseId_<?php echo $houseData['id_house']; ?>" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
                             <div class="modal-dialog">
                                 <div class="modal-content">
                                     <div class="modal-header">
@@ -255,6 +250,7 @@
                                                 <input type="hidden" class="form-control" id="method" name="method" value="newRoom">
                                             </div>
                                             
+                                            <?php echo $houseData['id_house']; ?>
                                             <button type="submit" class="btn btn-primary">Dodaj pokój</button>
                                         </form>
                                     </div>
@@ -279,57 +275,7 @@
         <div class="container mt-2">
             <div class="row justify-content-center mt-5">
                 <div class="col-8 btn-container text-center">
-                    <!-- Dodaj ten kod w miejscu, gdzie chcesz wyświetlić przycisk do otwierania formularza -->
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addHouseModal">
-                        Dodaj nowy dom
-                    </button>
-
-                    <!-- Modal nowy dom -->
-                    <div class="modal fade" id="addHouseModal" tabindex="-1" aria-labelledby="addHouseModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="addHouseModalLabel">Dodaj nowy dom</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <!-- Formularz dodawania nowego domu -->
-                                    <form method="POST" id="add_house-form">
-                                        <div class="mb-3">
-                                            <h3 class="mb-4">Nowy Dom</h3>
-                                        </div>
-                                        <div class='row justify-content-center mt-3'>
-                                            <div class="col-md-6">
-                                                <label for="nazwa_domu" class="form-label">Nazwa domu:</label>
-                                                <input type="text" class="form-control" id="name_house" name="nazwa_domu" aria-describedby="text" required>
-                                            </div>
-                                        </div>
-                                        <div class='row justify-content-center mt-3'>
-                                            <div class="col-md-6">
-                                                <label for="postalCode" class="form-label">Kod pocztowy:</label>
-                                                <input type="text" class="form-control" id="postalCode" name="postalCode">
-                                            </div>
-                                        </div>
-                                        <div class='row justify-content-center mt-3'>
-                                            <div class="col-md-6">
-                                                <label for="city" class="form-label">Miasto:</label>
-                                                <select id="city" class="form-control" name="city">
-                                                    <option value="">Wpisz Miasto</option>
-                                                </select>   
-                                            </div>
-                                        </div>
-                                        <div class='row justify-content-center mt-5'>
-                                            <div class="col-md-6 text-center">
-                                                <input type="hidden" name="method" value="newHouse">
-                                                <button class="btn btn-primary" type="submit">Dodaj Dom</button>
-                                            </div>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
+                    <a class="btn btn-secondary rounded p-3 mb-3" href="http://localhost/studia/SMARTHOME/strony/new_house.php" >Dodaj nowy dom</a>
                 </div>
                 <div>
                     <?php if (!empty($message)): ?>
@@ -340,48 +286,6 @@
         </div>
     <?php endif; ?>
 <script>
-    
-    document.getElementById("postalCode").addEventListener("change", function() {
-        var selectedPostalCode = this.value;
-        var citySelect = document.getElementById("city");
-        citySelect.innerHTML = ""; // Wyczyść pole wyboru miasta
-        switch (selectedPostalCode) {
-            case '0':
-                alert('Błąd');
-                break;
-            <?php echo $cityOptions; ?>
-            default:
-                // W przypadku braku pasującej miejscowości, daj możliwość wpisania niestandardowej
-                citySelect.options.add(new Option("Inne", "Inne"));
-        }
-
-    });
-    function addHouse() {
-        // Pobierz dane z formularza
-        const formData = new FormData(document.getElementById('add_house-form'));
-
-        // Wysyłka danych za pomocą fetch i metody POST
-        fetch('http://localhost/studia/SMARTHOME/php_script/house.php', {
-            method: 'POST',
-            body: formData,
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Obsługa odpowiedzi z serwera
-            console.log(data);
-
-            // Przykład: Wyświetl komunikat po udanym dodaniu domu
-            if (data.success) {
-                alert('Dom dodany pomyślnie.');
-                
-            } else {
-                alert('Błąd podczas dodawania domu: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Błąd podczas wysyłania żądania:', error);
-        });
-    }
     function confirmRoomDelete(room_id, roomName) {
             // Wywołaj modal z potwierdzeniem
             var isConfirmed = confirm("Czy na pewno chcesz usunąć pokój " + roomName + "?");
@@ -412,37 +316,7 @@
                 });
             }
         }
-    function confirmHouseDelete(house_id, houseName) {
-        // Wywołaj modal z potwierdzeniem
-        var isConfirmed = confirm("Czy na pewno chcesz usunąć dom " + houseName + "?");
-        console.log(house_id)
-        // Jeśli użytkownik potwierdzi, wykonaj usunięcie
-        if (isConfirmed) {
-            fetch('http://localhost/studia/SMARTHOME/php_script/house.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'method=delete&house_id=' + house_id,
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Obsługa odpowiedzi z serwera
-                console.log(data);
-                if (data.success) {
-                    alert('Pokój usunięty pomyślnie.');
-                    window.location.reload();
-                } else {
-                    alert('Błąd podczas usuwania pokoju: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Błąd podczas wysyłania żądania:', error);
-            });
-        }
-    }
 
-    
     var socket = new WebSocket("ws://localhost:8080");
 
     // Obsługa zdarzenia po nawiązaniu połączenia WebSocket
@@ -561,56 +435,24 @@
 
     //sterowanie wyskakującego okna dodania urządzenia
     document.addEventListener('DOMContentLoaded', function () {
-        const addDeviceForms = document.querySelectorAll('form[id^="add_device-form"]');
+        const ipAddressInput = document.querySelector('#Ip_address');
+        const validationMessage = document.createElement('span');
+        validationMessage.className = 'text-danger';
+        ipAddressInput.parentNode.appendChild(validationMessage);
 
-        addDeviceForms.forEach(function (addDeviceForm) {
-            const ipAddressInput = addDeviceForm.querySelector('.form-control[name="ip_adres"]');
-            const validationMessage = document.createElement('span');
-            validationMessage.className = 'text-danger';
-            ipAddressInput.parentNode.appendChild(validationMessage);
+        ipAddressInput.addEventListener('input', function () {
+            const ipAddress = this.value;
+            const isValidIpAddress = isValidIPv4(ipAddress);
 
-            addDeviceForm.addEventListener('submit', function (event) {
-                event.preventDefault(); // Zapobiegnij standardowemu przesłaniu formularza
-
-                // Pobierz dane z formularza
-                const formData = new FormData(this);
-
-                // Sprawdź poprawność adresu IP
-                const ipAddress = formData.get('ip_adres');
-                try {
-                    if (isValidIPv4(ipAddress)) {
-                        validationMessage.textContent = '';
-                        //checkConnection(ipAddress); // Próba nawiązania połączenia
-                    } else {
-                        throw new Error('Wprowadź poprawny adres IP (np. 192.168.1.1).');
-                    }
-                } catch (error) {
-                    validationMessage.textContent = error.message;
-                    return; // Przerwij proces, jeśli adres IP jest nieprawidłowy
-                }
-
-                // Wysyłka danych za pomocą fetch i metody POST
-                fetch('http://localhost/studia/SMARTHOME/php_script/device.php', {
-                    method: 'POST',
-                    body: formData,
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        // Tutaj możesz obsłużyć odpowiedź z serwera
-                        console.log(data);
-
-                        // Przykład: Wyświetl komunikat po udanym dodaniu urządzenia
-                        if (data.success) {
-                            alert('Urządzenie dodane pomyślnie.');
-                            window.location.reload();
-                        } else {
-                            alert('Błąd podczas dodawania urządzenia: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Błąd podczas wysyłania żądania:', error);
-                    });
-            });
+            if (isValidIpAddress) {
+                this.setCustomValidity('');
+                validationMessage.textContent = '';
+                // Próba nawiązania połączenia
+                checkConnection(ipAddress);
+            } else {
+                this.setCustomValidity('Wprowadź poprawny adres IP (np. 192.168.1.1).');
+                validationMessage.textContent = 'Wprowadź poprawny adres IP (np. 192.168.1.1).';
+            }
         });
 
         function isValidIPv4(ipAddress) {
@@ -633,17 +475,16 @@
                 ['192.168.0.0', '192.168.255.255']
             ];
 
-            const userIP = ipToNumber(ipAddress);
-
             for (const range of privateIPRanges) {
                 const startIP = ipToNumber(range[0]);
                 const endIP = ipToNumber(range[1]);
+                const userIP = ipToNumber(ipAddress);
                 if (userIP >= startIP && userIP <= endIP) {
-                    return true; // Adres IP jest prywatny
+                    return false;
                 }
             }
 
-            return false;
+            return true;
         }
 
         function checkConnection(ipAddress) {
@@ -655,7 +496,8 @@
             };
 
             img.onerror = function () {
-                throw new Error('Nie można nawiązać połączenia z adresem IP.');
+                const errorMessage = 'Nie można nawiązać połączenia z adresem IP.';
+                validationMessage.textContent = errorMessage;
             };
         }
 
@@ -663,56 +505,11 @@
             const parts = ip.split('.').map(part => parseInt(part, 10));
             return (parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3];
         }
-    });
-    //obsługa formularza nowy dom
-    document.addEventListener('DOMContentLoaded', function() {
-        // Pobierz formularz
-        const addHouseForm = document.getElementById('add_house-form');
 
-        // Dodaj nasłuchiwanie na zdarzenie submit formularza
-        addHouseForm.addEventListener('submit', function(event) {
-            // Zapobiegnij domyślnej akcji formularza (przesłaniu danych i przeładowaniu strony)
-            event.preventDefault();
-
-            // Pobierz dane z formularza
-            const formData = new FormData(addHouseForm);
-
-            // Wyślij żądanie POST do odpowiedniego adresu URL (zmień na swój)
-            fetch('http://localhost/studia/SMARTHOME/php_script/house.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Tutaj możesz obsługiwać odpowiedź od serwera
-                console.log(data);
-                if (data.success) {
-                        alert('Pokój usunięty pomyślnie.');
-                        // Tutaj możesz dodać dodatkową logikę, jeśli potrzebujesz
-                        window.location.reload();
-                    } else {
-                        alert('Błąd podczas usuwania pokoju: ' + data.message);
-                    }
-            })
-            .catch(error => {
-                console.error('Błąd podczas wysyłania żądania:', error);
-            });
-        });
     });
 
-
-    //sterowanie formularz dodawania pokoju
+    //dodawanie pokoju
     document.addEventListener('DOMContentLoaded', function () {
-        const addRoomButtons = document.querySelectorAll('.btn-primary[data-bs-toggle="modal"]');
-
-        addRoomButtons.forEach(function (button) {
-            button.addEventListener('click', function () {
-                const houseId = this.getAttribute('data-houseid');
-                // Ustawienie aktualnego house_id w formularzu
-                document.getElementById('houseId').value = houseId;
-            });
-        });
-
         const addRoomForm = document.getElementById('addRoomForm');
         const roomNameInput = document.querySelector('#roomName');
         const houseIdInput = document.querySelector('#houseId');
@@ -734,31 +531,30 @@
             } else {
                 validationMessage.textContent = '';
             }
-
+            alert('Dodawanie pokoju.');
             // Wysyłka danych za pomocą fetch i metody POST
             fetch('http://localhost/studia/SMARTHOME/php_script/room.php', {
                 method: 'POST',
                 body: formData,
             })
-            .then(response => response.json())
-            .then(data => {
-                // Tutaj możesz obsłużyć odpowiedź z serwera
-                console.log(data);
+                .then(response => response.json())
+                .then(data => {
+                    // Tutaj możesz obsłużyć odpowiedź z serwera
+                    console.log(data);
 
-                // Przykład: Wyświetl komunikat po udanym dodaniu pokoju
-                if (data.success) {
-                    alert('Pokój dodany pomyślnie.');
-                    window.location.reload();
-                } else {
-                    alert('Błąd podczas dodawania pokoju: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Błąd podczas wysyłania żądania:', error);
-            });
+                    // Przykład: Wyświetl komunikat po udanym dodaniu pokoju
+                    if (data.success) {
+                        alert('Pokój dodany pomyślnie.');
+                        window.location.reload();
+                    } else {
+                        alert('Błąd podczas dodawania pokoju: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Błąd podczas wysyłania żądania:', error);
+                });
         });
     });
-
 
 
 </script>

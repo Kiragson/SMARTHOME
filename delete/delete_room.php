@@ -72,6 +72,7 @@ if (isset($_GET['id_room'])) {
                         'userId' => $user_id,
                         'message' => 'Operacja zakończona pomyślnie. Pokój i urządzenia.' . $id_pokoju
                     );
+                    
                     $url = 'http://localhost/studia/SMARTHOME/php_script/add_mesage.php';
                     $ch = curl_init($url);
             

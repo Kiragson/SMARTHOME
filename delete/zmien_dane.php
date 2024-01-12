@@ -43,7 +43,7 @@ $conn->close();
     <div class="container mt-5">
         <h1>Edycja informacji o koncie</h1>
         <div class="p-2 m-2 ">
-            <form action="http://localhost/studia/SMARTHOME/php_script/aktualizuj_dane.php" method="post">
+            <form action="http://localhost/studia/SMARTHOME/php_script/user.php" method="post">
                 <div class="mb-3 row">
                     <label for="username">Nazwa użytkownika:</label>
                     <input type="text" name="username" id="username" value="<?php echo $login; ?>" readonly>
@@ -66,6 +66,7 @@ $conn->close();
                     <input type="text" name="phone_number" id="phone_number" value="<?php echo $telefon; ?>">
                 </div>
                 <div class="mb-3 row">
+                    <input type="hidden" name="method" value="update">
                     <button class="btn btn-warning rounded p-2 mt-5 w-50 mb-3 container" type="submit" id="zmiany">Zapisz zmiany</button>
                 </div>
             </form>

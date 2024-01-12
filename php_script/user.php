@@ -36,14 +36,11 @@ class Database
     }
 }
 
-class PasswordValidator
-{
-   
-}
 
 class UserManager
 {
     private $database;
+    private $conn;
 
     public function isValid($password)
     {
@@ -58,6 +55,7 @@ class UserManager
     public function __construct(Database $database)
     {
         $this->database = $database;
+        $this->conn=$database->getConn();
     }
 
     public function login($loginOrEmail, $password)
@@ -139,46 +137,128 @@ class UserManager
             return $error_message;
         }
     }
+    public function updateUser($username, $imie, $nazwisko, $email, $telefon, $user_id)
+{
+    $response = array();
+
+    $update_query = "UPDATE user SET first_name = ?, last_name = ?, email = ?, phone_number = ? WHERE id = ?";
+
+    $stmt = $this->conn->prepare($update_query);
+    $stmt->bind_param("ssssi", $imie, $nazwisko, $email, $telefon, $user_id);
+
+    if ($stmt->execute()) {
+        $_SESSION["success_message"] = "Dane użytkownika zostały zaktualizowane.";
+
+        $message = array(
+            'userId' => $user_id,
+            'message' => 'Zamiana danych użytkownika'
+        );
+
+        $url = 'http://localhost/studia/SMARTHOME/php_script/add_message.php';
+        $ch = curl_init($url);
+
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $message);
+
+        $response_curl = curl_exec($ch);
+
+        if ($response_curl === false) {
+            $response['success'] = false;
+            $response['message'] = 'Błąd podczas wysyłania wiadomości: ' . curl_error($ch);
+        } else {
+            $response['success'] = true;
+            $response['message'] = 'Dane użytkownika zostały zaktualizowane, a wiadomość wysłana.';
+        }
+
+        curl_close($ch);
+    } else {
+        $response['success'] = false;
+        $response['message'] = "Wystąpił błąd podczas aktualizacji danych użytkownika: " . $stmt->error;
+    }
+
+    $stmt->close();
+
+    return $response;
+}
+
+
+
 }
 
 $database = new Database("localhost", "smarthome", "witryna", "zaq1@WSX");
 $userManager = new UserManager($database);
 
 
-if ($_SERVER["REQUEST_METHOD"] == "POST"){
-
-    $rodzaj=$_POST["method"];
-    
-}
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $login = $_POST["login"];
-    $password = $_POST["password"];
-    $rodzaj=$_POST["method"];
-    if(isset($_POST["email"])){
-        $email = $_POST["email"];
-    }
-
-    if($rodzaj=="logowanie"){
-        $errorMessage = $userManager->login($login, $password);
-        if ($errorMessage) {
-            header("Location: http://localhost/studia/SMARTHOME/strony/login.php?error=" . urlencode($errorMessage));
-            exit;
-        }
-    }
-    else if($rodzaj=="rejestracja"){
-        
-        $errorMessage = $userManager->registerUser($email, $password, $login);
-
-        if ($errorMessage) {
-            header("Location: http://localhost/studia/SMARTHOME/strony/register.php?error_message=" . urlencode($errorMessage));
-            exit;
-        }
-    }
-
+    $postData = $_POST;
     
+    if (isset($_POST["method"])) {
+        $rodzaj = $_POST["method"];
+    } else {
+        $rodzaj = null;
+    }
+}
+else if ($_SERVER["REQUEST_METHOD"] == "GET") {
+    $getData = $_GET;
+
+    if (isset($_GET["method"])) {
+        $rodzaj = $_GET["method"];
+    } else {
+        $rodzaj = null;
+    }
 }
 
+if (isset($rodzaj)) {
+    function getRequestParam($param, $source, $message) {
+        return isset($source[$param]) && $source[$param] !== null ? $source[$param] : setResponse(false, $message);
+    }
+    switch ($rodzaj) {
+        case 'logowanie':
+
+            $login = getRequestParam("login",$_POST, 'Brak wartości zmiennej login');
+            $password = getRequestParam("password",$_POST, 'Brak wartości zmiennej password');
+            $response = $userManager->login($login, $password);
+            header("Location: http://localhost/studia/SMARTHOME/index.html");
+            break;
+
+        case 'rejestracja':
+
+            $login = getRequestParam("login",$_POST, 'Brak wartości zmiennej login');
+            $password = getRequestParam("password",$_POST, 'Brak wartości zmiennej password');
+            $email = getRequestParam("email",$_POST, 'Brak wartości zmiennej email');
+            $response = $userManager->registerUser($email, $password, $login);
+            header("Location: http://localhost/studia/SMARTHOME/index.html");
+            break;
+        
+        case 'update':
+            $imie = getRequestParam('first_name', $postData, 'Brak wartości zmiennej first_name');
+            $nazwisko = getRequestParam('last_name', $postData, 'Brak wartości zmiennej last_name');
+            $email = getRequestParam('email', $postData, 'Brak wartości zmiennej email');
+            $telefon = getRequestParam('phone_number', $postData, 'Brak wartości zmiennej phone_number');
+            $username = getRequestParam('username', $postData, 'Brak wartości zmiennej username');
+            $user_id = $_SESSION['user_id'];
+
+            $response = $userManager->updateUser($username, $imie, $nazwisko, $email, $telefon, $user_id);
 
 
+            break;
+        case 'logout':
+            // Zakończenie sesję
+            session_destroy();
+            header("Location: http://localhost/studia/SMARTHOME/index.html");
+            break;
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    
+    function setResponse($success, $message) {
+        return ['success' => $success, 'message' => $message];
+    }
+}
+else {
+    //echo "brak rodzaju";
+}
 $database->close();
 ?>

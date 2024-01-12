@@ -15,16 +15,13 @@
           <a class="nav-link" href="http://localhost/studia/SMARTHOME/strony/house.php">Dom</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Ustawienia</a>
-        </li>
-        <li class="nav-item">
           <a class="nav-link" href="http://localhost/studia/SMARTHOME/strony/message.php">Powiadomienia</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="http://localhost/studia/SMARTHOME/strony/konto.php">Konto</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="http://localhost/studia/SMARTHOME/php_script/wyloguj.php">Wyloguj</a>
+          <a class="nav-link" href="http://localhost/studia/SMARTHOME/php_script/user.php?method=logout">Wyloguj</a>
         </li>
       </ul>
     </div>

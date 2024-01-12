@@ -71,7 +71,7 @@
                     <div class="col-2"><h2> <?php echo $roomName; ?></h2></div>
                     <div class="col-7"></div>
                     <div class="col-3">
-                        <a href="http://localhost/studia/SMARTHOME/php_script/delete_room.php?id_room=<?php echo $roomId; ?>" class="btn "><i class="bi bi-trash3"></i></a>
+                        <button class="btn" onclick="confirmRoomDelete('<?php echo $roomId; ?>', '<?php echo $roomName; ?>');"><i class="bi bi-trash3"></i></button>
                         <a href="http://localhost/studia/SMARTHOME/php_script/update_room.php?room_id=<?php echo $roomId; ?>"class="btn " ><i class="bi bi-pen-fill"></i></a>
                     </div>
                 </div>
@@ -101,14 +101,10 @@
                                     <div class="col-2">
                                     </div>
                                     <div class="col-2">
-                                        <button class="btn" onclick="confirmDelete('<?php echo $device['deviceId'] ?>', '<?php echo $device['deviceName']; ?>');"><i class="bi bi-trash3"></i></button>
+                                        <button class="btn" onclick="confirmDeviceDelete('<?php echo $device['deviceId'] ?>', '<?php echo $device['deviceName']; ?>');"><i class="bi bi-trash3"></i></button>
                                         <button class="btn" data-bs-toggle="modal" data-bs-target="#editDeviceModal_<?php echo $device['deviceId']; ?>"><i class="bi bi-pen-fill"></i></button>
                                     </div>
                                 </div>
-                                
-
-                                
-
 
                                 <hr>
                             <?php endforeach; ?>
@@ -161,69 +157,99 @@
                 </div>
                 <!-- update -->
                 <div class="modal fade" id="editDeviceModal_<?php echo $device['deviceId']; ?>" tabindex="-1" aria-labelledby="editDeviceModalLabel_<?php echo $device['deviceId']; ?>" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title" id="editDeviceModalLabel_<?php echo $device['deviceId']; ?>">Edytuj urządzenie</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <form action="http://localhost/studia/SMARTHOME/php_script/device.php" method="POST" id="update_device-form">
-                                                    <div class="mb-3">
-                                                        <label for="editDeviceName" class="form-label">Nowa nazwa:</label>
-                                                        <input type="text" class="form-control" name="editDeviceName" id="editDeviceName_<?php echo $device['deviceId']; ?>" value="<?php echo $device['deviceName']; ?>">
-                                                    </div>
-
-                                                    <div class="mb-3">
-                                                        <label for="editDeviceIp" class="form-label">Adres IP:</label>
-                                                        <input type="text" class="form-control" name="editDeviceIp" id="editDeviceIp_<?php echo $device['deviceId']; ?>" value="<?php echo $device['ip']; ?>">
-                                                    </div>
-
-                                                    <div class="text-end">
-                                                        <input type="hidden" name="method" value="update">
-                                                        <input type="hidden" name="device_Id" value="<?php echo $device['deviceId']; ?>">
-                                                        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editDeviceModalLabel_<?php echo $device['deviceId']; ?>">Edytuj urządzenie</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="http://localhost/studia/SMARTHOME/php_script/device.php" method="POST" id="update_device-form">
+                                    <div class="mb-3">
+                                        <label for="editDeviceName" class="form-label">Nowa nazwa:</label>
+                                        <input type="text" class="form-control" name="editDeviceName" id="editDeviceName_<?php echo $device['deviceId']; ?>" value="<?php echo $device['deviceName']; ?>">
                                     </div>
-                                </div>
+
+                                    <div class="mb-3">
+                                        <label for="editDeviceIp" class="form-label">Adres IP:</label>
+                                        <input type="text" class="form-control" name="editDeviceIp" id="editDeviceIp_<?php echo $device['deviceId']; ?>" value="<?php echo $device['ip']; ?>">
+                                    </div>
+
+                                    <div class="text-end">
+                                        <input type="hidden" name="method" value="update">
+                                        <input type="hidden" name="device_Id" value="<?php echo $device['deviceId']; ?>">
+                                        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </div>
     </div>
 
     <script>
-        function confirmDelete(deviceId, deviceName) {
+        function confirmDeviceDelete(device_id, deviceName) {
             // Wywołaj modal z potwierdzeniem
             var isConfirmed = confirm("Czy na pewno chcesz usunąć urządzenie '" + deviceName + "'?");
-            console.log(deviceId)
+            console.log(device_id)
             // Jeśli użytkownik potwierdzi, wykonaj usunięcie
             if (isConfirmed) {
-        fetch('http://localhost/studia/SMARTHOME/php_script/device.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'method=delete&device_id=' + deviceId,
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Obsługa odpowiedzi z serwera
-            console.log(data);
-            if (data.success) {
-                alert('Urządzenie usunięte pomyślnie.');
-                // Tutaj możesz dodać dodatkową logikę, jeśli potrzebujesz
-                window.location.reload();
-            } else {
-                alert('Błąd podczas usuwania urządzenia: ' + data.message);
+                fetch('http://localhost/studia/SMARTHOME/php_script/device.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'method=delete&device_id=' + device_id,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Obsługa odpowiedzi z serwera
+                    console.log(data);
+                    if (data.success) {
+                        alert('Urządzenie usunięte pomyślnie.');
+                        // Tutaj możesz dodać dodatkową logikę, jeśli potrzebujesz
+                        window.location.reload();
+                    } else {
+                        alert('Błąd podczas usuwania urządzenia: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Błąd podczas wysyłania żądania:', error);
+                });
             }
-        })
-        .catch(error => {
-            console.error('Błąd podczas wysyłania żądania:', error);
-        });
-    }
+        }
+        function confirmRoomDelete(room_id, roomName) {
+            // Wywołaj modal z potwierdzeniem
+            var isConfirmed = confirm("Czy na pewno chcesz usunąć urządzenie '" + roomName + "'?");
+            console.log(room_id)
+            // Jeśli użytkownik potwierdzi, wykonaj usunięcie
+            if (isConfirmed) {
+                fetch('http://localhost/studia/SMARTHOME/php_script/room.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'method=delete&room_id=' + room_id,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Obsługa odpowiedzi z serwera
+                    console.log(data);
+                    if (data.success) {
+                        alert('Urządzenie usunięte pomyślnie.');
+                        // Tutaj możesz dodać dodatkową logikę, jeśli potrzebujesz
+                        window.location.reload();
+                    } else {
+                        alert('Błąd podczas usuwania urządzenia: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Błąd podczas wysyłania żądania:', error);
+                });
+            }
         }
         flag=0;
         function editDevice(device_id) {
@@ -301,6 +327,7 @@
         socket.onerror = function (error) {
             console.error("House.php/217: Błąd połączenia z serwerem WebSocket: " + error.message);
         };
+
         // Funkcja do przełączania stanu urządzenia
         function toggleDevice(device_id, currentState) {
             console.log("House.php/222: Przycisk kliknięty dla urządzenia o ID: " + device_id);
@@ -312,6 +339,7 @@
             socket.send(message);
             console.log("House.php/229: Wysyłanie danych na serwer");
         }
+
         // Funkcja do pobierania i aktualizacji stanu urządzenia
         function toggleDeviceState(device_id) {
             // Wysyłanie zapytania do serwera w celu pobrania stanu urządzenia
@@ -340,6 +368,7 @@
                     console.error('Błąd podczas pobierania stanu urządzenia: ' + error.message);
                 });
         }
+
         // Formularz dodawania urządzenia
         document.addEventListener('DOMContentLoaded', function () {
             const addDeviceForm = document.getElementById('add_device-form');
@@ -455,7 +484,6 @@
                 alert((success ? "Operacja udana: " : " ") + message);
             }
         });
-
 
     </script>
 </body>

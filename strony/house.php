@@ -156,7 +156,7 @@
                                                 </div>
                                                 <div class="col-2">
                                                     <!-- Dodaj przycisk edycji, który uruchomi tryb edycji dla konkretnego urządzenia -->
-                                                    <a href="http://localhost/studia/SMARTHOME/php_script/delete_device.php?device_id=<?php echo $deviceData['id']; ?>" class="btn"><i class="bi bi-trash3"></i></a>
+                                                    <a href="http://localhost/studia/SMARTHOME/php_script/device.php?device_id=<?php echo $deviceData['id']; ?>&method=delete" class="btn"><i class="bi bi-trash3"></i></a>
                                                 </div>
                                             </div>
                                         <?php endforeach; ?>
@@ -171,14 +171,15 @@
                                         </button>
                                     </div>
 
-                                    <div class="modal fade" id="addDeviceModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal fade" id="addDeviceModal" tabindex="-1" aria-labelledby="add_device_label" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
                                                 <div class="modal-header">
-                                                    <h5 class="modal-title" id="exampleModalLabel">Dodaj nowe urządzenie</h5>
+                                                    <h5 class="modal-title" id="add_device_label">Dodaj nowe urządzenie</h5>
                                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
+                                                    <!--TO DO Naprawienie tej metody-->
                                                     <form action="http://localhost/studia/SMARTHOME/php_script/device.php" method="POST" id="add_device-form">
                                                         <div class='row justify-content-center mt-5'>
                                                             <div class="mb-3">
@@ -195,8 +196,8 @@
                                                                 <input type="hidden" name="stan" value="0">
                                                             </div>
                                                             <div class="mb-3">
-                                                                <label for="room" class="form-label">Wybierz pokój:</label>
-                                                                <input type="text" class="form-control" name="roomID<?php echo $roomId; ?>" id="<?php echo $roomId; ?>" value="<?php echo $roomData['name']; ?>">
+                                                                <input type="hidden" name="id_room" value="<?php echo $roomId; ?>">
+                                                                <input type="hidden" name="stan" value="0">
                                                             </div>
                                                         </div>
                                                         <div class='row justify-content-center mt-5'>

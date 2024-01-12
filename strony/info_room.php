@@ -5,7 +5,7 @@
 
     if (isset($_GET['id_room'])) {
         $user_id = $_SESSION['user_id'];
-        $id_pokoju = $_GET['id_room'];
+        $roomId = $_GET['id_room'];
 
         // Połączenie z bazą danych (zakładam, że masz już skonfigurowane połączenie)
         require_once("../connected.php");
@@ -18,7 +18,7 @@
                 WHERE R.id = ?";
         // Przygotuj zapytanie SQL
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $id_pokoju);
+        $stmt->bind_param("i", $roomId);
 
         $stmt->execute();
         $result = $stmt->get_result();
@@ -69,13 +69,12 @@
             <div class="col-8 navbar-light p-5 rounded h-100" style="background-color: #e3f2fd;">
                 <div class="row">
                     <div class="col-2"><h2> <?php echo $roomName; ?></h2></div>
-                    <div class="col-8"></div>
-                    <div class="col-2">
-                        <a href="http://localhost/studia/SMARTHOME/php_script/delete_room.php?id_room=<?php echo $id_pokoju; ?>" class="btn "><i class="bi bi-trash3"></i></a>
-                        <a href="http://localhost/studia/SMARTHOME/php_script/update_room.php?room_id=<?php echo $id_pokoju; ?>"class="btn " ><i class="bi bi-pen-fill"></i></a>
+                    <div class="col-7"></div>
+                    <div class="col-3">
+                        <a href="http://localhost/studia/SMARTHOME/php_script/delete_room.php?id_room=<?php echo $roomId; ?>" class="btn "><i class="bi bi-trash3"></i></a>
+                        <a href="http://localhost/studia/SMARTHOME/php_script/update_room.php?room_id=<?php echo $roomId; ?>"class="btn " ><i class="bi bi-pen-fill"></i></a>
                     </div>
                 </div>
-                <hr>
                 <div class="container border-top border-2 border-dark">
                     <h3>Urządzenia dostępne w pokoju</h3>
                     <div class="p-2 m-2">
@@ -102,42 +101,130 @@
                                     <div class="col-2">
                                     </div>
                                     <div class="col-2">
-                                        <!-- Dodaj przycisk edycji, który uruchomi tryb edycji dla konkretnego urządzenia -->
-                                        <a href="http://localhost/studia/SMARTHOME/php_script/delete_device.php?device_id=<?php echo $device['deviceId']; ?>" class="btn "><i class="bi bi-trash3"></i></a>
-                                        <button class="btn " onclick="editDevice(<?php echo $device['deviceId']; ?>)"><i class="bi bi-pen-fill"></i></button>
+                                        <button class="btn" onclick="confirmDelete('<?php echo $device['deviceId'] ?>', '<?php echo $device['deviceName']; ?>');"><i class="bi bi-trash3"></i></button>
+                                        <button class="btn" data-bs-toggle="modal" data-bs-target="#editDeviceModal_<?php echo $device['deviceId']; ?>"><i class="bi bi-pen-fill"></i></button>
                                     </div>
                                 </div>
-                                <div class="pt-4" id="editForm_<?php echo $device['deviceId']; ?>" style="display: none;">
-                                    <form action="http://localhost/studia/SMARTHOME/php_script/update_device.php" method="POST">
-                                        <label for="editDeviceName">Nowa:</label>
-                                        <input type="text" id="editDeviceName_<?php echo $device['deviceId']; ?>" value="<?php echo $device['deviceName']; ?>">
+                                
 
-                                        <label for="editDeviceIp">Adres IP:</label>
-                                        <input type="text" id="editDeviceIp_<?php echo $device['deviceId']; ?>" value="<?php echo $device['ip']; ?>">
+                                
 
-                                        <button class="btn btn-primary p-2"  type="submit"> Zapisz zmiany</button>
-                                        <button class="btn btn-secondary p-2" onclick="cancelEdit(<?php echo $device['deviceId']; ?>)">Anuluj</button>
-                                    </form>
-                                </div>
+
                                 <hr>
                             <?php endforeach; ?>
                         <?php else : ?>
                             <p>Brak urządzeń w pokoju.</p>
                         <?php endif; ?>
-                        <div>
-                            <form action="http://localhost/studia/SMARTHOME/strony/new_device.php" method="GET">
-                                <input type="hidden" name="id_house" value="<?php echo $houseId; ?>">
-                                <input type="hidden" name="id_room" value="<?php echo $id_pokoju; ?>">
-                                <button class="btn btn-primary" type="submit"><i class="bi bi-plus-circle"></i></button>
-                            </form>
+                        
+                    </div>
+                </div>
+                <div class="container">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDeviceModal">
+                        <i class="bi bi-plus-circle"></i>
+                    </button>
+                </div>
+                <!--new device-->
+                <div class="modal fade" id="addDeviceModal" tabindex="-1" aria-labelledby="add_device_label" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="add_device_label">Dodaj nowe urządzenie</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="add_device-form">
+                                    <div class='row justify-content-center mt-5'>
+                                        <div class="mb-3">
+                                            <label for="name_device" class="form-label">Nazwa</label>
+                                            <input type="text" class="form-control" id="name_device" name="name_device" aria-describedby="text">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="Ip_address" class="form-label">Adres IP:</label>
+                                            <input type="text" class="form-control" id="ip_adres" name="ip_adres" aria-describedby="text" required>
+                                            <small class="text-muted">Podaj poprawny adres IP (IPv4).</small>
+                                        </div>
+                                        <input type="hidden" name="id_house" value="<?php echo $houseId ?>">
+                                        <input type="hidden" name="stan" value="0">
+                                        <input type="hidden" name="id_room" value="<?php echo $roomId; ?>">
+                                        <input type="hidden" name="stan" value="0">
+                                    </div>
+                                    <div class='row justify-content-center mt-5'>
+                                        <div class="col-4 justify-content-center row">
+                                            <input type="hidden" name="method" value="addDevice">
+                                            <button class="btn btn-primary p-2" type="submit">Dodaj Urządzenie</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
+                <!-- update -->
+                <div class="modal fade" id="editDeviceModal_<?php echo $device['deviceId']; ?>" tabindex="-1" aria-labelledby="editDeviceModalLabel_<?php echo $device['deviceId']; ?>" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editDeviceModalLabel_<?php echo $device['deviceId']; ?>">Edytuj urządzenie</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="http://localhost/studia/SMARTHOME/php_script/device.php" method="POST" id="update_device-form">
+                                                    <div class="mb-3">
+                                                        <label for="editDeviceName" class="form-label">Nowa nazwa:</label>
+                                                        <input type="text" class="form-control" name="editDeviceName" id="editDeviceName_<?php echo $device['deviceId']; ?>" value="<?php echo $device['deviceName']; ?>">
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label for="editDeviceIp" class="form-label">Adres IP:</label>
+                                                        <input type="text" class="form-control" name="editDeviceIp" id="editDeviceIp_<?php echo $device['deviceId']; ?>" value="<?php echo $device['ip']; ?>">
+                                                    </div>
+
+                                                    <div class="text-end">
+                                                        <input type="hidden" name="method" value="update">
+                                                        <input type="hidden" name="device_Id" value="<?php echo $device['deviceId']; ?>">
+                                                        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
             </div>
         </div>
     </div>
 
     <script>
+        function confirmDelete(deviceId, deviceName) {
+            // Wywołaj modal z potwierdzeniem
+            var isConfirmed = confirm("Czy na pewno chcesz usunąć urządzenie '" + deviceName + "'?");
+            console.log(deviceId)
+            // Jeśli użytkownik potwierdzi, wykonaj usunięcie
+            if (isConfirmed) {
+        fetch('http://localhost/studia/SMARTHOME/php_script/device.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'method=delete&device_id=' + deviceId,
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Obsługa odpowiedzi z serwera
+            console.log(data);
+            if (data.success) {
+                alert('Urządzenie usunięte pomyślnie.');
+                // Tutaj możesz dodać dodatkową logikę, jeśli potrzebujesz
+                window.location.reload();
+            } else {
+                alert('Błąd podczas usuwania urządzenia: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Błąd podczas wysyłania żądania:', error);
+        });
+    }
+        }
         flag=0;
         function editDevice(device_id) {
             if(flag==0){
@@ -253,6 +340,123 @@
                     console.error('Błąd podczas pobierania stanu urządzenia: ' + error.message);
                 });
         }
+        // Formularz dodawania urządzenia
+        document.addEventListener('DOMContentLoaded', function () {
+            const addDeviceForm = document.getElementById('add_device-form');
+            const ipAddressInput = document.querySelector('#ip_adres');
+            const validationMessage = document.createElement('span');
+            validationMessage.className = 'text-danger';
+            ipAddressInput.parentNode.appendChild(validationMessage);
+
+            addDeviceForm.addEventListener('submit', function (event) {
+                event.preventDefault(); // Zapobiegnij standardowemu przesłaniu formularza
+
+                // Pobierz dane z formularza
+                const formData = new FormData(this);
+
+                // Sprawdź poprawność adresu IP
+                const ipAddress = formData.get('ip_adres');
+                try {
+                    if (isValidIPv4(ipAddress)) {
+                        validationMessage.textContent = '';
+                        //checkConnection(ipAddress); // Próba nawiązania połączenia
+                    } else {
+                        throw new Error('Wprowadź poprawny adres IP (np. 192.168.1.1).');
+                    }
+                } catch (error) {
+                    validationMessage.textContent = error.message;
+                    return; // Przerwij proces, jeśli adres IP jest nieprawidłowy
+                }
+
+                // Wysyłka danych za pomocą fetch i metody POST
+                fetch('http://localhost/studia/SMARTHOME/php_script/device.php', {
+                    method: 'POST',
+                    body: formData,
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Tutaj możesz obsłużyć odpowiedź z serwera
+                        console.log(data);
+
+                        // Przykład: Wyświetl komunikat po udanym dodaniu urządzenia
+                        if (data.success) {
+                            alert('Urządzenie dodane pomyślnie.');
+                            window.location.reload();
+                        } else {
+                            alert('Błąd podczas dodawania urządzenia: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Błąd podczas wysyłania żądania:', error);
+                    });
+            });
+
+            function isValidIPv4(ipAddress) {
+                const blocks = ipAddress.split('.');
+                if (blocks.length !== 4) {
+                    return false;
+                }
+
+                for (const block of blocks) {
+                    const number = parseInt(block, 10);
+                    if (isNaN(number) || number < 0 || number > 255) {
+                        return false;
+                    }
+                }
+
+                // Sprawdzanie prywatnych adresów IP (możesz dostosować tę listę)
+                const privateIPRanges = [
+                    ['10.0.0.0', '10.255.255.255'],
+                    ['172.16.0.0', '172.31.255.255'],
+                    ['192.168.0.0', '192.168.255.255']
+                ];
+
+                const userIP = ipToNumber(ipAddress);
+
+                for (const range of privateIPRanges) {
+                    const startIP = ipToNumber(range[0]);
+                    const endIP = ipToNumber(range[1]);
+                    if (userIP >= startIP && userIP <= endIP) {
+                        return true; // Adres IP jest prywatny
+                    }
+                }
+
+                return false;
+            }
+
+            function checkConnection(ipAddress) {
+                const img = new Image();
+                img.src = `http://${ipAddress}`;
+
+                img.onload = function () {
+                    console.log(`Połączono z adresem IP: ${ipAddress}`);
+                };
+
+                img.onerror = function () {
+                    throw new Error('Nie można nawiązać połączenia z adresem IP.');
+                };
+            }
+
+            function ipToNumber(ip) {
+                const parts = ip.split('.').map(part => parseInt(part, 10));
+                return (parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3];
+            }
+        });
+
+        //powiadomienia
+        document.addEventListener('DOMContentLoaded', function () {
+            // Pobierz wartości z parametrów URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success') === 'true'; // Sprawdź, czy 'success' to '1'
+            const message = urlParams.get('message');
+
+            // Wyświetl wyskakujące okno na podstawie otrzymanych danych
+            if (message) {
+                alert((success ? "Operacja udana: " : " ") + message);
+            }
+        });
+
+
     </script>
 </body>
 </html>

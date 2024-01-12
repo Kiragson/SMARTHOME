@@ -29,6 +29,7 @@ class SmartHomeManager
         header('Content-Type: application/json');
         echo json_encode($response);
     }
+    
     private function handleCreateHome($postData)
     {
         $nazwa_domu = $postData['nazwa_domu'];

@@ -212,44 +212,115 @@ class SmartHomeManager
         return $response;
     }
 
-    public function updateFamilyMembers($postData)
-    {
+    public function updateFamilyMembers($postData) {
+        $response = array('success' => false, 'message' => '');
+    
         if (isset($_SESSION['username'])) {
-            $familyId = $postData['family_id'];
-            $user2 = $postData['user2'];
-            $user3 = $postData['user3'];
-            $user4 = $postData['user4'];
-            $user5 = $postData['user5'];
-            $user6 = $postData['user6'];
-
-            $sql = "UPDATE Family 
-            SET user2 = ?, user3 = ?, user4 = ?, user5 = ?, user6 = ? 
-            WHERE id = ?";
-
-            $stmt = $this->database->getPDO()->prepare($sql);
-            $stmt->bindParam(1, $user2, PDO::PARAM_INT);
-            $stmt->bindParam(2, $user3, PDO::PARAM_INT);
-            $stmt->bindParam(3, $user4, PDO::PARAM_INT);
-            $stmt->bindParam(4, $user5, PDO::PARAM_INT);
-            $stmt->bindParam(5, $user6, PDO::PARAM_INT);
-            $stmt->bindParam(6, $familyId, PDO::PARAM_INT);
-
-            if ($stmt->execute()) {
-                // Pomyślnie zaktualizowano dane
-            } else {
-                $response['success'] = false;
-                $response['message'] = "Błąd podczas aktualizacji danych: " . $stmt->errorInfo()[2];
+            try {
+                // Sprawdzenie czy użytkownicy istnieją przed aktualizacją
+                foreach (['user2', 'user3', 'user4', 'user5', 'user6'] as $userKey) {
+                    if (!empty($postData[$userKey])) {
+                        $this->checkUserExistence($postData[$userKey]);
+                    }
+                }
+    
+                // Aktualizacja składu rodziny
+                $sql = "UPDATE Family 
+                        SET user2 = :user2, user3 = :user3, user4 = :user4, user5 = :user5, user6 = :user6 
+                        WHERE id = :familyId";
+    
+                $stmt = $this->database->getPDO()->prepare($sql);
+                $this->bindNullableParam($stmt, ':user2', $postData['user2'], PDO::PARAM_INT);
+                $this->bindNullableParam($stmt, ':user3', $postData['user3'], PDO::PARAM_INT);
+                $this->bindNullableParam($stmt, ':user4', $postData['user4'], PDO::PARAM_INT);
+                $this->bindNullableParam($stmt, ':user5', $postData['user5'], PDO::PARAM_INT);
+                $this->bindNullableParam($stmt, ':user6', $postData['user6'], PDO::PARAM_INT);
+                $stmt->bindParam(':familyId', $postData['family_id'], PDO::PARAM_INT);
+    
+                if ($stmt->execute()) {
+                    // Pomyślnie zaktualizowano dane
+                    $this->sendMessage($_SESSION['user_id'], 'Zaktualizowano skład rodziny.');
+                    $response = array('success' => true, 'message' => 'Famili została zaktualizowana.');
+                } else {
+                    $response = array('success' => false, 'message' => 'Błąd podczas aktualizacji danych: ' . $stmt->errorInfo()[2]);
+                }
+            } catch (PDOException $e) {
+                $response = array('success' => false, 'message' => 'Błąd podczas wykonywania zapytania SQL: ' . $e->getMessage());
+            } catch (Exception $e) {
+                $response = array('success' => false, 'message' => 'Błąd: ' . $e->getMessage());
             }
-
-            // Wysyłanie wiadomości
-            $this->sendMessage($_SESSION['user_id'], 'Zaktualizowano skład rodziny.');
         } else {
-            $response['success'] = false;
-            $response['message'] = "Użytkownik nie jest zalogowany.";
+            $response = array('success' => false, 'message' => 'Użytkownik nie jest zalogowany.');
+        }
+    
+        return $response;
+    }
+    
+    private function checkUserExistence($userIdOrLogin) {
+        $response = array();
+    
+        try {
+            // Przygotuj zapytanie SQL przy użyciu PDO
+            $sql = "SELECT id, login FROM user WHERE id = :userIdOrLogin OR login = :userIdOrLogin";
+    
+            // Przygotuj zapytanie SQL
+            $stmt = $this->database->getPDO()->prepare($sql);
+    
+            // Przypisz wartości do zmiennych w zapytaniu
+            $stmt->bindParam(':userIdOrLogin', $userIdOrLogin, PDO::PARAM_INT);
+    
+            // Tutaj wykonaj zapytanie i przetwórz wyniki...
+            $stmt->execute();
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+            if ($result) {
+                $response = $this->setResponse(true, "Użytkownik o ID lub loginie '$userIdOrLogin' istnieje.");
+            } else {
+                $response = $this->setResponse(false, "Użytkownik o ID lub loginie '$userIdOrLogin' nie istnieje.");
+                throw new Exception(); // Przerwij proces w przypadku błędu
+            }
+        } catch (PDOException $e) {
+            $response = $this->setResponse(false, "Błąd przy wykonaniu zapytania SQL: " . $e->getMessage());
+        }
+    
+        return $response;
+    }
+
+    private function bindNullableParam($stmt, $param, $value, $type) {
+        if ($value !== null) {
+            $stmt->bindParam($param, $value, $type);
+        } else {
+            $stmt->bindValue($param, null, PDO::PARAM_NULL);
+        }
+    }
+
+    public function updateHouse($postData)
+    {
+        $response = array();
+
+        $newName = isset($postData['name']) ? $postData['name'] : null;
+        $city = isset($postData['city']) ? $postData['city'] : null;
+        $postalCode = isset($postData['postalCode']) ? $postData['postalCode'] : null;
+
+        // Uaktualnianie informacji o domu
+        $updateDomSql = "UPDATE house SET name = ?, city = ?, postcode = ? WHERE id = ?";
+
+        $stmt = $this->database->getPDO()->prepare($updateDomSql);
+        $stmt->bindParam(1, $newName, PDO::PARAM_STR);
+        $stmt->bindParam(2, $city, PDO::PARAM_STR);
+        $stmt->bindParam(3, $postalCode, PDO::PARAM_STR);
+        $stmt->bindParam(4, $postData['house_id'], PDO::PARAM_INT);
+
+        if ($stmt->execute()) {
+            $response = $this->setResponse(true, "Zaktualizowano informacje o domu: " . $newName);
+        } else {
+            $response = $this->setResponse(false, "Błąd podczas aktualizacji informacji o domu: " . $stmt->errorInfo()[2]);
         }
 
         return $response;
     }
+
+    
 
     private function sendMessage($user_id, $message)
     {
@@ -269,8 +340,8 @@ class SmartHomeManager
 
         // Sprawdź, czy zapytanie cURL zakończyło się sukcesem
         if ($curlResponse === false) {
-            $response['success'] = false;
-            $response['message'] = 'Błąd podczas wysyłania wiadomości: ' . curl_error($ch);
+            
+            $response = $this->setResponse(false, 'Błąd podczas wysyłania wiadomości: ' . curl_error($ch));
         }
 
         curl_close($ch);
@@ -289,11 +360,11 @@ if ($_SERVER["REQUEST_METHOD"] == "GET") {
 }
 
 if (isset($rodzaj)) {
+    $response=array();
     function getRequestParam($param, $source, $message)
     {
         return isset($source[$param]) && $source[$param] !== null ? $source[$param] : setResponse(false, $message);
     }
-
     switch ($rodzaj) {
         case "create":
             $postData = $_POST;
@@ -311,6 +382,11 @@ if (isset($rodzaj)) {
             $postData = $_POST;
             $response=$smartHomeManager->createHome($postData);
             break;
+        case "edit_House":
+            $postData = $_POST;
+            $response=$smartHomeManager->createHome($postData);
+            break;
+            
     }
     header('Content-Type: application/json');
     echo json_encode($response);

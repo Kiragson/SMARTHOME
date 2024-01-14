@@ -111,8 +111,15 @@
             </div>
         </div>
     </div>
-    <script>
-    
+<script>
+    function changeStructure() {
+    // Ukrycie starej struktury
+    document.getElementById('oldStructure').style.display = 'none';
+
+    // Wyświetlenie nowej struktury
+    document.getElementById('newStructure').style.display = 'block';
+}
+
 </script>
 </body>
 </html>

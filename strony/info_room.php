@@ -104,6 +104,36 @@
                                         <button class="btn" onclick="confirmDeviceDelete('<?php echo $device['deviceId'] ?>', '<?php echo $device['deviceName']; ?>');"><i class="bi bi-trash3"></i></button>
                                         <button class="btn" data-bs-toggle="modal" data-bs-target="#editDeviceModal_<?php echo $device['deviceId']; ?>"><i class="bi bi-pen-fill"></i></button>
                                     </div>
+                                    <!-- update -->
+                                    <div class="modal fade" id="editDeviceModal_<?php echo $device['deviceId']; ?>" tabindex="-1" aria-labelledby="editDeviceModalLabel_<?php echo $device['deviceId']; ?>" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="editDeviceModalLabel_<?php echo $device['deviceId']; ?>">Edytuj urządzenie</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form action="http://localhost/studia/SMARTHOME/php_script/device.php" method="POST" id="update_device-form">
+                                                        <div class="mb-3">
+                                                            <label for="editDeviceName" class="form-label">Nowa nazwa:</label>
+                                                            <input type="text" class="form-control" name="editDeviceName" id="editDeviceName_<?php echo $device['deviceId']; ?>" value="<?php echo $device['deviceName']; ?>">
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label for="editDeviceIp" class="form-label">Adres IP:</label>
+                                                            <input type="text" class="form-control" name="editDeviceIp" id="editDeviceIp_<?php echo $device['deviceId']; ?>" value="<?php echo $device['ip']; ?>">
+                                                        </div>
+
+                                                        <div class="text-end">
+                                                            <input type="hidden" name="method" value="update">
+                                                            <input type="hidden" name="device_Id" value="<?php echo $device['deviceId']; ?>">
+                                                            <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <hr>
@@ -155,36 +185,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- update -->
-                <div class="modal fade" id="editDeviceModal_<?php echo $device['deviceId']; ?>" tabindex="-1" aria-labelledby="editDeviceModalLabel_<?php echo $device['deviceId']; ?>" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h5 class="modal-title" id="editDeviceModalLabel_<?php echo $device['deviceId']; ?>">Edytuj urządzenie</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <form action="http://localhost/studia/SMARTHOME/php_script/device.php" method="POST" id="update_device-form">
-                                    <div class="mb-3">
-                                        <label for="editDeviceName" class="form-label">Nowa nazwa:</label>
-                                        <input type="text" class="form-control" name="editDeviceName" id="editDeviceName_<?php echo $device['deviceId']; ?>" value="<?php echo $device['deviceName']; ?>">
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="editDeviceIp" class="form-label">Adres IP:</label>
-                                        <input type="text" class="form-control" name="editDeviceIp" id="editDeviceIp_<?php echo $device['deviceId']; ?>" value="<?php echo $device['ip']; ?>">
-                                    </div>
-
-                                    <div class="text-end">
-                                        <input type="hidden" name="method" value="update">
-                                        <input type="hidden" name="device_Id" value="<?php echo $device['deviceId']; ?>">
-                                        <button type="submit" class="btn btn-primary">Zapisz zmiany</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
 
             </div>
         </div>

@@ -26,7 +26,7 @@
 
     // Przygotuj zapytanie SQL przy użyciu przygotowanych zapytań
     $sql = "SELECT u.id, u.login, u.number_of_houses AS NOH, 
-        h.id AS house_id, h.name AS house_name, 
+        h.id AS house_id, h.name AS house_name, h.city as house_city, h.postcode as house_zipcode,
         f.id_admin AS id_admin,
         r.id AS room_id, r.name AS room_name,
         d.id AS device_id, d.name AS device_name, d.state AS device_stan
@@ -52,14 +52,21 @@
         while ($row = $result->fetch_assoc()) {
             $userId = $row['id'];
             $userName = $row['login'];
+
             $houseId = $row['house_id'];
+            $houseCity=$row['house_city'];
+            $housePostcode=$row['house_zipcode'];
             $houseName = $row['house_name'];
+
             $idAdmin = $row['id_admin'];
+
             $roomName = $row['room_name'];
             $roomId = $row['room_id'];
+
             $deviceName = $row['device_name'];
             $deviceId = $row['device_id'];
             $deviceStan = $row['device_stan'];
+
             $isAdmin = ($userId == $idAdmin);
             $numberHouse= $row['NOH'];
             // Jeśli urzytkownik ma domy
@@ -73,6 +80,8 @@
                 $houses[$houseId] = [
                     'name' => $houseName,
                     'id_house'=>$houseId,
+                    'postcode'=>$housePostcode,
+                    'city'=>$houseCity,
                     'rooms' => [],
                 ];
             }
@@ -122,9 +131,37 @@
                                     <i class="bi bi-sliders"></i>
                                 </button>
                                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>">
-                                    <a class="dropdown-item" href="edit_house.php?id_domu=<?php echo $houseData['id_house']; ?>">Edytuj</a>
+                                    <button class="dropdown-item btn" onclick="openEditHouseModal('<?php $houseData['id_house']; ?>')">Edytuj</button>
                                     <button class="dropdown-item btn" onclick="confirmHouseDelete('<?php echo $houseData['id_house']; ?>', '<?php echo $houseData['name']; ?>');">Usuń</button>
                                     <a class="dropdown-item" href="info_house.php?id_domu=<?php echo $houseData['id_house']; ?>" >Informacje</a>
+                                </div>
+                                <!--edit house-->
+                                <div class="modal fade" id="editHouseModal" tabindex="-1" aria-labelledby="editHouseModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editHouseModalLabel">Edycja Informacji o: <?php echo isset($houseData['name']) ? $houseData['name'] : ''; ?></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form id="editHouseForm">
+                                                    <div class="p-2 m-2">
+                                                        <label for="city" class="form-label">Nazwa: </label>
+                                                        <input type="text" class="form-control" id="name" name="name" placeholder="<?php echo isset($houseData['name']) ? $houseData['name'] : 'Wpisz nazwe'; ?>" aria-describedby="house_name">
+                                                        <label for="city" class="form-label">Miasto: </label>
+                                                        <input type="text" class="form-control" id="city" name="city" placeholder="<?php echo isset($houseData['city']) ? $houseData['city'] : 'Wpisz miasto'; ?>" aria-describedby="house_city">
+                                                        <label for="postalCode" class="form-label">Kod pocztowy</label>
+                                                        <input type="text" class="form-control" id="postalCode" name="postalCode" placeholder="<?php echo isset($houseData['postcode']) ? $houseData['postcode'] : 'Wpisz Kod pocztowy'; ?>" aria-describedby="house_zipcode">
+                                                        <input type="hidden" id="method" name="method" value="edit_house">
+                                                    </div>
+                                                </form>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                                                <button type="button" class="btn btn-warning" onclick="submitInfoHouse()">Zapisz zmiany</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -148,6 +185,7 @@
                                                 <button class="dropdown-item btn" onclick="confirmRoomDelete('<?php echo $roomId; ?>', '<?php echo $roomData['name']; ?>');">Usuń</button>
                                                 <a class="dropdown-item" href="info_room.php?id_room=<?php echo $roomId; ?>">Informacje</a>
                                             </div>
+
                                         </div>
                                     </div>
                                     <!-- wyświetlanie i obsługa urządzeń -->
@@ -261,6 +299,7 @@
                                 </div>
                             </div>
                         </div>
+                        
                     </div>
                     
                 <?php else: ?>
@@ -758,6 +797,36 @@
             });
         });
     });
+
+    //sterowanie formularza edycji domu
+    function openEditHouseModal($id_house) {
+            // Otwórz modal
+            var editHouseModal = new bootstrap.Modal(document.getElementById('editHouseModal'));
+            editHouseModal.show();
+            
+            // Ustaw wartości pól formularza na aktualne dane
+            document.getElementById('city').value = '<?php echo isset($houseCity) ? $houseCity : ''; ?>';
+            document.getElementById('postalCode').value = '<?php echo isset($zipcode) ? $zipcode : ''; ?>';
+        }
+    function submitInfoHouse() {
+        var form = document.getElementById("editHouseForm");
+        var formData = new FormData(form);
+
+        fetch('../php_script/house.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                        alert('Zmieniono informacje domu');
+                        window.location.reload();
+            } else {
+                alert('Błąd zmiany domu: ' + data.message);
+            }
+        })
+        .catch(error => console.error('Błąd:', error));
+    }
 
 
 

@@ -61,6 +61,7 @@
     <title><?php echo $roomName; ?></title>
     <?php include '../template/css.php'; ?>
     <?php include '../template/script.php'; ?>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 </head>
 <body>
     <?php include '../template/header.php'; ?>
@@ -72,7 +73,7 @@
                     <div class="col-7"></div>
                     <div class="col-3">
                         <button class="btn" onclick="confirmRoomDelete('<?php echo $roomId; ?>', '<?php echo $roomName; ?>');"><i class="bi bi-trash3"></i></button>
-                        <a href="http://localhost/studia/SMARTHOME/php_script/update_room.php?room_id=<?php echo $roomId; ?>"class="btn " ><i class="bi bi-pen-fill"></i></a>
+                        <button class="btn" data-bs-toggle="modal" data-bs-target="#updateRoom" onclick="RoomUpdate();"><i class="bi bi-pen-fill"></i></button>
                     </div>
                 </div>
                 <div class="container border-top border-2 border-dark">
@@ -90,12 +91,10 @@
                                     </div>
                                     <div class="col-2">
                                         <div class="form-check form-switch">
-                                            <input class="form-check-input" type="checkbox" id="deviceSwitch_<?php echo $device['deviceId']; ?>" onchange="toggleDeviceState(<?php echo $device['deviceId']; ?>)" <?php echo ($device['stan'] == 1) ? "checked" : ""; ?>>
+                                            <input class="form-check-input" type="checkbox" id="deviceSwitch_<?php echo $device['deviceId']; ?>" onchange="toggleDevice(<?php echo $device['deviceId']; ?>)" <?php echo ($device['stan'] == 1) ? "checked" : ""; ?>>
                                             <label class="form-check-label" for="deviceSwitch_<?php echo $device['deviceId']; ?>"></label>
                                         </div>
-                                        <input type="hidden" id="deviceButton_<?php echo $device['deviceId']; ?>" onclick="toggleDeviceState(<?php echo $device['deviceId']; ?>)">
-                                            <?php // echo ($device['stan'] == 1) ? "On" : "Off"; ?>
-                                        </input>
+                                        
                                     </div>
                                     
                                     <div class="col-2">
@@ -104,7 +103,7 @@
                                         <button class="btn" onclick="confirmDeviceDelete('<?php echo $device['deviceId'] ?>', '<?php echo $device['deviceName']; ?>');"><i class="bi bi-trash3"></i></button>
                                         <button class="btn" data-bs-toggle="modal" data-bs-target="#editDeviceModal_<?php echo $device['deviceId']; ?>"><i class="bi bi-pen-fill"></i></button>
                                     </div>
-                                    <!-- update -->
+                                    <!-- update device-->
                                     <div class="modal fade" id="editDeviceModal_<?php echo $device['deviceId']; ?>" tabindex="-1" aria-labelledby="editDeviceModalLabel_<?php echo $device['deviceId']; ?>" aria-hidden="true">
                                         <div class="modal-dialog">
                                             <div class="modal-content">
@@ -185,7 +184,36 @@
                         </div>
                     </div>
                 </div>
-                
+                <!--new updateroom-->
+                <div class="modal fade" id="updateRoom" tabindex="-1" aria-labelledby="updateRoom_label" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="updateRoom_label">Dodaj nowe urządzenie</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="updateRoom-form">
+                                    <div class='row justify-content-center mt-5'>
+                                        <div class="mb-3">
+                                            <label for="name_room" class="form-label">Nowa Nazwa</label>
+                                            <input type="text" class="form-control" id="name_room" name="name_room"  value="<?php echo $roomName; ?>" aria-describedby="text">
+                                        </div>
+                                    </div>
+                                    <div class='row justify-content-center mt-5'>
+                                        <div class="col-4 justify-content-center row">
+                                            <input type="hidden" name="method" value="edit_room">
+                                            <input type="hidden" name="room_id" value="<?php echo $roomId; ?>">
+                                            <button class="btn btn-primary p-2" onclick="UpdateRoomForm()">Edytuj Pokój</button>
+                                            <button class="btn btn-secondary p-2 mx-2" type="button" data-bs-dismiss="modal">Anuluj</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
 
             </div>
         </div>
@@ -291,6 +319,39 @@
             document.getElementById('deviceButton_' + device_id).innerHTML = newName;
             document.getElementById('editForm_' + device_id).style.display = 'none'; // Ukryj formularz po zapisaniu zmian
         }
+
+        function UpdateRoomForm() {
+            const updateRoomForm = document.getElementById("updateRoom-form");
+
+            updateRoomForm.addEventListener("submit", function (event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                const formData = new FormData(updateRoomForm);
+
+                fetch("../php_script/room.php", {
+                    method: "POST",
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the response from the server
+                    if (data.success) {
+                        // Actions to perform on success
+                        alert("Room updated successfully!");
+                        window.location.reload();
+                    } else {
+                        // Actions to perform on failure
+                        alert("Failed to update room:", data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Fetch error:", error);
+                });
+            });
+        }
+
+    
+        
         var socket = new WebSocket("ws://localhost:8080");
         // Obsługa zdarzenia po nawiązaniu połączenia WebSocket
         socket.onopen = function (event) {
@@ -299,22 +360,40 @@
 
         // Obsługa zdarzenia po otrzymaniu wiadomości od serwera WebSocket
         socket.onmessage = function (event) {
+            console.log(event);
+            if (event.data && event.data.includes('state')) {
             var response = JSON.parse(event.data);
+            console.log(response);
 
-            if (response.success) {
-                // Zaktualizuj stan przycisku na stronie
-                var button = document.getElementById("deviceButton_" + response.device_id);
-                console.log("House.php/195: Zmiana stanu");
-                if (button.innerHTML === "On") {
-                    button.innerHTML = "Off";
-                } else {
-                    button.innerHTML = "On";
-                }
-            } else {
-                console.error("House.php/202: Wystąpił błąd podczas zmiany stanu urządzenia");
-            }
+            var device_id = response.device_id;
+            var state = response.state;
+            
+            console.log("device_id:", device_id);
+            console.log("old state:", state);
+            toggler(device_id,state);
+
+        }
         };
 
+        function toggler(device_id, newState) {
+            console.log("toggler");
+            console.log("device_id:", device_id);
+            console.log("new state:", newState);
+            const checkbox = document.getElementById("deviceSwitch_" + device_id);
+            if(newState==1){
+                if (checkbox) {
+                    checkbox.checked = newState === 1;
+                }
+            }
+            else{
+                if (checkbox) {
+                    checkbox.checked = newState;
+                }
+            }
+            
+            
+        };
+        
         // Obsługa zdarzenia po rozłączeniu z serwerem WebSocket
         socket.onclose = function (event) {
             if (event.wasClean) {
@@ -331,43 +410,14 @@
 
         // Funkcja do przełączania stanu urządzenia
         function toggleDevice(device_id, currentState) {
-            console.log("House.php/222: Przycisk kliknięty dla urządzenia o ID: " + device_id);
+            console.log(" Przycisk kliknięty dla urządzenia o ID: " + device_id);
 
             // Przygotuj dane do wysłania jako JSON
             var message = JSON.stringify({ device_id: device_id, state: currentState });
 
             // Wyślij dane na serwer WebSocket
             socket.send(message);
-            console.log("House.php/229: Wysyłanie danych na serwer");
-        }
-
-        // Funkcja do pobierania i aktualizacji stanu urządzenia
-        function toggleDeviceState(device_id) {
-            // Wysyłanie zapytania do serwera w celu pobrania stanu urządzenia
-            fetch('http://localhost/studia/SMARTHOME/php_script/get_device_state.php?device_id=' + device_id)
-                .then(response => response.json())
-                .then(data => {
-                    // Aktualizacja tekstu przycisku i wywołanie funkcji do przełączania stanu
-                    const buttonElement = document.getElementById('deviceButton_' + device_id);
-                    if (buttonElement) {
-                        console.log("House.php/241: Zmiana Stanu");
-                        if (data.state === 0) {
-                            buttonElement.innerHTML = "Off";
-                        } else if (data.state === 1){
-                            buttonElement.innerHTML = "On";
-                        }
-                        else{
-                            console.error("House.php/248: Błędny stan przycisku")
-                        }
-
-                        // Wywołanie funkcji do przełączania stanu z aktualnym stanem
-                        toggleDevice(device_id, data.state);
-                    }
-                    console.log('deviceButton_' + device_id+" "+data.state);
-                })
-                .catch(error => {
-                    console.error('Błąd podczas pobierania stanu urządzenia: ' + error.message);
-                });
+            console.log("Wysyłanie danych na serwer");
         }
 
         // Formularz dodawania urządzenia
@@ -485,6 +535,11 @@
                 alert((success ? "Operacja udana: " : " ") + message);
             }
         });
+
+
+
+
+
 
     </script>
 </body>

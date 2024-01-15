@@ -94,10 +94,22 @@ class SmartHomeManager
             $stmt->bindParam(4, $kod, PDO::PARAM_STR);
 
             if ($stmt->execute()) {
-                $response = $this->setResponse(true, "House created for family with house id: {$lastInsertedFamilyId}");
+                
+                // Assuming $user_id is the user ID you want to update
+                $updateUserSql = "UPDATE user SET number_of_houses = number_of_houses + 1 WHERE id = ?";
+                $stmtUpdateUser = $this->database->getPDO()->prepare($updateUserSql);
+                $stmtUpdateUser->bindParam(1, $user_id, PDO::PARAM_INT);
+
+                if ($stmtUpdateUser->execute()) {
+                    $response = $this->setResponse(true, "House created for family with house id: {$lastInsertedFamilyId}");
+                } else {
+                    $response['success'] = false;
+                    $response['message'] = "Error updating user's number of house: " . $this->database->getPDO()->errorInfo()[2];
+                }
 
                 $this->sendMessage($user_id, 'House created: ' . $nazwa_domu);
             } else {
+                $response['success'] = false;
                 $response['message'] = "Error creating house: " . $this->database->getPDO()->errorInfo()[2];
             }
         } else {
@@ -320,7 +332,45 @@ class SmartHomeManager
         return $response;
     }
 
-    
+    public function getFamilyHousesForAdmin()
+    {
+        $user_id = $_SESSION['user_id'];
+        try {
+            // Zapytanie SQL do pobrania ID rodziny i informacji o domach
+            $sql = "SELECT f.id, h.id AS house_id, h.name 
+                    FROM family AS f 
+                    LEFT JOIN house AS h ON f.id = h.family_id 
+                    WHERE f.id_admin = :user_id";
+                    
+            $stmt = $this->database->getPDO()->prepare($sql);
+            $stmt->bindParam(":user_id", $user_id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            // Sprawdź czy są dane
+            if ($stmt->rowCount() > 0) {
+                // Przygotuj tablicę do przechowania danych o domach
+                $familyHouses = array();
+
+                // Pobierz dane z każdego wiersza
+                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                    $familyHouse = array(
+                        "family_id" => $row["id"],
+                        "house_id" => $row["house_id"],
+                        "house_name" => $row["name"]
+                    );
+                    $familyHouses[] = $familyHouse;
+                }
+
+                // Zwróć dane w formie JSON
+                return json_encode($familyHouses);
+            }
+
+            // Jeśli brak danych, zwróć pustą tablicę
+            return json_encode(array());
+        } catch (PDOException $e) {
+            die("Error: " . $e->getMessage());
+        }
+    }
 
     private function sendMessage($user_id, $message)
     {
@@ -384,7 +434,10 @@ if (isset($rodzaj)) {
             break;
         case "edit_House":
             $postData = $_POST;
-            $response=$smartHomeManager->createHome($postData);
+            $response=$smartHomeManager->updateHouse($postData);
+            break;
+        case "house_list":
+            $response=$smartHomeManager->getFamilyHousesForAdmin();
             break;
             
     }

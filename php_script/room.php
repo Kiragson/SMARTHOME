@@ -108,63 +108,56 @@ class RoomController
         return $stmtDeleteRoom->rowCount();
     }
 
-    public function updateRoom($newname, $newHouse_id, $room_id)
+    public function updateRoom($newname, $room_id)
     {
         $response = array();
 
-        // Sprawdź, czy sesja jest już rozpoczęta przed używaniem $_SESSION
-        if (isset($_SESSION['user_id'])) {
-            $user_id = $_SESSION['user_id'];
-        } else {
-            return setResponse(false, "Brak zainicjowanej sesji lub brak user_id.");
+        // Check if the session is started before using $_SESSION
+        if (!isset($_SESSION['user_id'])) {
+            $response = setResponse(false, "Brak zainicjowanej sesji lub brak user_id.");
+            return $response;
+        }
+        if (!is_string($newname)) {
+            // Obsłuż błąd, np. poinformuj o problemie
+            $response = setResponse(false, "Błąd: $newname nie jest poprawnym ciągiem znaków.");
+            return $response;
         }
 
-        // Pobierz połączenie z bazą danych
+        $user_id = $_SESSION['user_id'];
         $pdo = $this->database->getPDO();
 
         try {
-            // Sprawdź, czy pokój istnieje
-            $sqlCheck = "SELECT id, house_id FROM room WHERE id = ?";
+            // Check if the room exists
+            $sqlCheck = "SELECT id FROM room WHERE id = ?";
             $stmtCheck = $pdo->prepare($sqlCheck);
             $stmtCheck->bindParam(1, $room_id, PDO::PARAM_INT);
             $stmtCheck->execute();
             $resultCheck = $stmtCheck->fetch(PDO::FETCH_ASSOC);
 
-            if ($resultCheck) {
-                $house_id = $resultCheck['house_id'];
+            if (!$resultCheck) {
+                $response = setResponse(false, "Pokój o ID: $room_id nie istnieje.");
+                return $response;
+            }else{
+                // Update the room name
+                $sqlUpdate = "UPDATE room SET name = ? WHERE id = ?";
+                $stmtUpdate = $pdo->prepare($sqlUpdate);
+                $stmtUpdate->bindParam(1, $newname, PDO::PARAM_STR);
+                $stmtUpdate->bindParam(2, $room_id, PDO::PARAM_INT);
+                $stmtUpdate->execute();
 
-                // Przykładowa logika sprawdzająca, czy użytkownik jest właścicielem pokoju
-                if ($user_id == $this->getHouseOwner($house_id)) {
-                    // Pokój należy do użytkownika, można aktualizować dane
-                    $updatedRoom = $this->updateRoomData($pdo, $newname, $newHouse_id, $room_id);
-
-                    // Ustalamy odpowiedź JSON
-                    return setResponse(true, "Pokój został zaktualizowany pomyślnie. Zaktualizowano $updatedRoom rekordów.");
-                } else {
-                    // Użytkownik nie jest właścicielem pokoju
-                    return setResponse(false, "Nie jesteś właścicielem pokoju o ID: $room_id");
-                }
-            } else {
-                // Brak pokoju o podanym ID
-                return setResponse(false, "Pokój o ID: $room_id nie istnieje.");
+                // Set JSON response
+                $response = setResponse(true, "Pokój został zaktualizowany pomyślnie. Zaktualizowano {$stmtUpdate->rowCount()} rekordów.");
             }
         } catch (Exception $e) {
-            // Obsługa błędu związana z bazą danych
-            return setResponse(false, "Błąd bazy danych: " . $e->getMessage());
+            // Handle database-related error
+            $response = setResponse(false, "Błąd bazy danych: " . $e->getMessage());
         }
+
+        return $response;
     }
 
-    private function updateRoomData($pdo, $newname, $newHouse_id, $room_id)
-    {
-        $sqlUpdate = "UPDATE room SET name = ?, house_id = ? WHERE id = ?";
-        $stmtUpdate = $pdo->prepare($sqlUpdate);
-        $stmtUpdate->bindParam(1, $newname, PDO::PARAM_STR);
-        $stmtUpdate->bindParam(2, $newHouse_id, PDO::PARAM_INT);
-        $stmtUpdate->bindParam(3, $room_id, PDO::PARAM_INT);
-        $stmtUpdate->execute();
 
-        return $stmtUpdate->rowCount();
-    }
+
 
     public function addRoom($roomName, $idHouse)
     {
@@ -244,6 +237,7 @@ $database = new Database("localhost", "smarthome", "witryna", "zaq1@WSX");
 $roomController = new RoomController($database);
 
 if (isset($rodzaj)) {
+    $response=array();
     function getRequestParam($param, $source, $message) {
         return isset($source[$param]) && $source[$param] !== null ? $source[$param] : setResponse(false, $message);
     }
@@ -252,11 +246,11 @@ if (isset($rodzaj)) {
             $room_id = getRequestParam('room_id', $_POST, 'Brak wartości zmiennej room_id');
             $response = $roomController->deleteRoomAndDevices($room_id);
             break;
-        case 'update':
-            $newname = getRequestParam('newName', $_POST, 'Brak wartości zmiennej newName');
-            $newHouse_id = getRequestParam('newHouseId', $_POST, 'Brak wartości zmiennej newHouseId');
+        case 'edit_room':
+            //echo 'update';
+            $newname = getRequestParam('name_room', $_POST, 'Brak wartości zmiennej newName');
             $room_id = getRequestParam('room_id', $_POST, 'Brak wartości zmiennej roomId');
-            $response = $roomController->updateRoom($newname, $newHouse_id, $room_id);
+            $response = $roomController->updateRoom($newname, $room_id);
             break;
         case 'newRoom':
             $roomName = getRequestParam('roomName', $_POST, 'Brak wartości zmiennej roomName');

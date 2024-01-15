@@ -16,10 +16,10 @@ session_start();
         <div class="row justify-content-center mt-5">
             <div class="col-8 navbar-light p-5 rounded h-100" style="background-color: #e3f2fd;">
                 <h2>Formularz Rejestracji</h2>
-                <form method="post" action="http://localhost/studia/SMARTHOME/php_script/user.php" id="registration-form">
+                <form id="registration-form">
                     <div class="mb-3">
                         <label for="Login" class="form-label">Login:*</label>
-                        <input type="text" class="form-control" id="Login" name="Login" aria-describedby="LoginHelp" placeholder="Login" required>
+                        <input type="text" class="form-control" id="login" name="login" aria-describedby="LoginHelp" placeholder="Login" required>
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">Email:</label>
@@ -54,41 +54,116 @@ session_start();
             </div>
         </div>
 
-    <script>
-        
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const registrationForm = document.getElementById("registration-form");
         const passwordInput = document.getElementById("password");
         const showPasswordButton = document.getElementById("showPassword");
 
+        registrationForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(registrationForm);
+
+            fetch("http://localhost/studia/SMARTHOME/php_script/user.php", {
+                method: "POST",
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data);
+
+                    if (data.success) {
+                        alert("Rejestracja udana!");
+                        window.location.href = 'house.php';
+                    } else {
+                        alert("Błąd rejestracji: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Błąd fetch:", error);
+                });
+        });
+
         showPasswordButton.addEventListener("click", function () {
-            if (passwordInput.type === "password") {
-                passwordInput.type = "text";
-            } else {
-                passwordInput.type = "password";
-            }
+            passwordInput.type = passwordInput.type === "password" ? "text" : "password";
         });
-        document.getElementById("registration-form").addEventListener("submit", function(event) {
-            const email = document.getElementById("email").value;
-            const haslo = document.getElementById("password").value;
 
-            if (!validateEmail(email) || !validatePassword(haslo)) {
-                event.preventDefault(); // Zatrzymaj wysyłanie formularza
-                document.getElementById("error-message").innerHTML = "Wprowadź poprawny email i hasło.";
+    registrationForm.addEventListener("submit", function (event) {
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        const emailValidationResult = validateEmail(email);
+        const passwordValidationResult = validatePassword(password);
+
+        if (!emailValidationResult.isValid || !passwordValidationResult.isValid) {
+            event.preventDefault();
+
+            let errorMessage = "Wprowadź poprawne dane:";
+            
+            if (!emailValidationResult.isValid) {
+                errorMessage += `\n- ${emailValidationResult.message}`;
             }
-        });
-        
-        
 
-        function validateEmail(email) {
-            // Prosta walidacja adresu email za pomocą wyrażenia regularnego
-            const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-            return emailPattern.test(email);
+            if (!passwordValidationResult.isValid) {
+                errorMessage += `\n- ${passwordValidationResult.message}`;
+            }
+
+            document.getElementById("error-message").innerHTML = errorMessage;
+        }
+    });
+
+    function validateEmail(email) {
+        const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+        return {
+            isValid: emailPattern.test(email),
+            message: "Nieprawidłowy adres email.",
+        };
+    }
+
+    function validatePassword(password) {
+        const minLength = 8;
+        const minLowercase = 1;
+        const minUppercase = 1;
+        const minNumbers = 1;
+        const minSpecialChars = 1;
+
+        let errorMessage = "";
+
+        // Sprawdź długość hasła
+        if (password.length < minLength) {
+            errorMessage += `Hasło powinno mieć co najmniej ${minLength} znaków. `;
         }
 
-        function validatePassword(haslo) {
-            // Prosta walidacja hasła - może być dostosowana do Twoich wymagań
-            const minPasswordLength = 8;
-            return haslo.length >= minPasswordLength;
+        // Sprawdź obecność małych liter
+        if ((password.match(/[a-z]/g) || []).length < minLowercase) {
+            errorMessage += "Hasło powinno zawierać co najmniej jedną małą literę. ";
         }
-    </script>
+
+        // Sprawdź obecność dużych liter
+        if ((password.match(/[A-Z]/g) || []).length < minUppercase) {
+            errorMessage += "Hasło powinno zawierać co najmniej jedną dużą literę. ";
+        }
+
+        // Sprawdź obecność cyfr
+        if ((password.match(/[0-9]/g) || []).length < minNumbers) {
+            errorMessage += "Hasło powinno zawierać co najmniej jedną cyfrę. ";
+        }
+
+        // Sprawdź obecność znaków specjalnych
+        if ((password.match(/[!@#$%^&*(),.?":{}|<>]/g) || []).length < minSpecialChars) {
+            errorMessage += "Hasło powinno zawierać co najmniej jeden znak specjalny. ";
+        }
+
+        return {
+            isValid: errorMessage === "",
+            message: errorMessage,
+        };
+    }
+
+
+    });
+</script>
+
 </body>
 </html>

@@ -124,19 +124,23 @@
                         <!--nagłówek-->
                         <div class='row justify-content-center mt-5'>
                             <div class='col-10'>
-                                <h3><?php echo $houseData['name']; ?></h3>
+                                <h3><?php echo $houseData['name']; ?></h3> <?php $houseId; ?>
                             </div>
                             <div class="col-1 dropdown">
-                                <button class="btn" type="button" id="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>" data-bs-toggle="dropdown" aria-expanded="false">
+                                <button class="btn" type="button" id="dropdownMenuButtonHouse<?php echo $houseData['id_house']; ?>" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-sliders"></i>
                                 </button>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonRoom<?php echo $houseData['id_house']; ?>">
-                                    <button class="dropdown-item btn" onclick="openEditHouseModal('<?php $houseData['id_house']; ?>')">Edytuj</button>
+                                
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonHouse<?php echo $houseData['id_house']; ?>">
+                                
+                                    <button class="dropdown-item btn" data-bs-toggle="modal" data-bs-target="#editHouseModal_<?php echo $houseData['id_house']; ?>">Edytuj</button>
+
                                     <button class="dropdown-item btn" onclick="confirmHouseDelete('<?php echo $houseData['id_house']; ?>', '<?php echo $houseData['name']; ?>');">Usuń</button>
                                     <a class="dropdown-item" href="info_house.php?id_domu=<?php echo $houseData['id_house']; ?>" >Informacje</a>
                                 </div>
                                 <!--edit house-->
-                                <div class="modal fade" id="editHouseModal" tabindex="-1" aria-labelledby="editHouseModalLabel" aria-hidden="true">
+                                <div class="modal fade" id="editHouseModal_<?php echo $houseData['id_house']; ?>" tabindex="-1" aria-labelledby="editHouseModalLabel" aria-hidden="true">
+                                
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
@@ -147,12 +151,13 @@
                                                 <form id="editHouseForm">
                                                     <div class="p-2 m-2">
                                                         <label for="city" class="form-label">Nazwa: </label>
-                                                        <input type="text" class="form-control" id="name" name="name" placeholder="<?php echo isset($houseData['name']) ? $houseData['name'] : 'Wpisz nazwe'; ?>" aria-describedby="house_name">
+                                                        <input type="text" class="form-control" id="name" name="name" value="<?php echo isset($houseData['name']) ? $houseData['name'] : 'Wpisz nazwe'; ?>" aria-describedby="house_name">
                                                         <label for="city" class="form-label">Miasto: </label>
-                                                        <input type="text" class="form-control" id="city" name="city" placeholder="<?php echo isset($houseData['city']) ? $houseData['city'] : 'Wpisz miasto'; ?>" aria-describedby="house_city">
+                                                        <input type="text" class="form-control" id="city" name="city" value="<?php echo isset($houseData['city']) ? $houseData['city'] : 'Wpisz miasto'; ?>" aria-describedby="house_city">
                                                         <label for="postalCode" class="form-label">Kod pocztowy</label>
-                                                        <input type="text" class="form-control" id="postalCode" name="postalCode" placeholder="<?php echo isset($houseData['postcode']) ? $houseData['postcode'] : 'Wpisz Kod pocztowy'; ?>" aria-describedby="house_zipcode">
-                                                        <input type="hidden" id="method" name="method" value="edit_house">
+                                                        <input type="text" class="form-control" id="postalCode" name="postalCode" value="<?php echo isset($houseData['postcode']) ? $houseData['postcode'] : 'Wpisz Kod pocztowy'; ?>" aria-describedby="house_zipcode">
+                                                        <input type="hidden" id="method" name="method" value="edit_House">
+                                                        <input type="hidden" id="house_id" name="house_id" value="<?php echo $houseData['id_house']; ?>">
                                                     </div>
                                                 </form>
                                             </div>
@@ -181,9 +186,38 @@
                                                 <i class="bi bi-sliders"></i>
                                             </button>
                                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButtonRoom<?php echo $roomId; ?>">
-                                                <a class="dropdown-item" href="edit_room.php?id_room=<?php echo $roomId; ?>">Edytuj</a>
+                                                <button class="dropdown-item btn" data-bs-toggle="modal" data-bs-target="#updateRoom_<?php echo $roomId; ?>">Edytuj</button>
                                                 <button class="dropdown-item btn" onclick="confirmRoomDelete('<?php echo $roomId; ?>', '<?php echo $roomData['name']; ?>');">Usuń</button>
                                                 <a class="dropdown-item" href="info_room.php?id_room=<?php echo $roomId; ?>">Informacje</a>
+                                            </div>
+                                            <!--updateroom-->
+                                            <div class="modal fade" id="updateRoom_<?php echo $roomId; ?>" tabindex="-1" aria-labelledby="updateRoom_label" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="updateRoom_label">Dodaj nowe urządzenie</h5>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form id="updateRoom-form">
+                                                                <div class='row justify-content-center mt-5'>
+                                                                    <div class="mb-3">
+                                                                        <label for="name_room" class="form-label">Nowa Nazwa</label>
+                                                                        <input type="text" class="form-control" id="name_room" name="name_room" value="<?php echo $roomData['name']; ?>" aria-describedby="text">
+                                                                    </div>
+                                                                </div>
+                                                                <div class='row justify-content-center mt-5'>
+                                                                    <div class="col-4 justify-content-center row">
+                                                                        <input type="hidden" name="method" value="edit_room">
+                                                                        <input type="hidden" name="room_id" value="<?php echo $roomId; ?>">
+                                                                        <button class="btn btn-primary p-2" onclick="UpdateRoomForm()">Edytuj Pokój</button>
+                                                                        <button class="btn btn-secondary p-2 mx-2" type="button" data-bs-dismiss="modal">Anuluj</button>
+                                                                    </div>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
 
                                         </div>
@@ -197,13 +231,12 @@
                                                 </div>
                                                 <div class="col-2 p-2">
                                                     <div class="form-check form-switch">
-                                                        <input class="form-check-input" type="checkbox" id="deviceSwitch_<?php echo $deviceData['id'] ?>" onchange="toggleDeviceState(<?php echo $deviceData['id'] ?>)" <?php echo ($deviceData['stan'] == 1) ? "checked" : ""; ?>>
+                                                        <input class="form-check-input" type="checkbox" id="deviceSwitch_<?php echo $deviceData['id'] ?>" onchange="toggleDevice(<?php echo $deviceData['id'] ?>)" <?php echo ($deviceData['stan'] == 1) ? "checked" : ""; ?>>
                                                         <label class="form-check-label" for="deviceSwitch_<?php echo $deviceData['id'] ?>"></label>
                                                     </div>
                                                 </div>
                                                 <div class="col-2">
-                                                    <!-- Dodaj przycisk edycji, który uruchomi tryb edycji dla konkretnego urządzenia -->
-                                                    <a href="http://localhost/studia/SMARTHOME/php_script/device.php?device_id=<?php echo $deviceData['id']; ?>&method=delete" class="btn"><i class="bi bi-trash3"></i></a>
+                                                    <button class="btn" onclick="confirmDeviceDelete('<?php echo $deviceData['id'] ?>', '<?php echo $deviceData['name']; ?>');"><i class="bi bi-trash3"></i></button>
                                                 </div>
                                             </div>
                                         <?php endforeach; ?>
@@ -352,9 +385,7 @@
                                         <div class='row justify-content-center mt-3'>
                                             <div class="col-md-6">
                                                 <label for="city" class="form-label">Miasto:</label>
-                                                <select id="city" class="form-control" name="city">
-                                                    <option value="">Wpisz Miasto</option>
-                                                </select>   
+                                                <input type="text" id="city" class="form-control" name="city">   
                                             </div>
                                         </div>
                                         <div class='row justify-content-center mt-5'>
@@ -379,8 +410,38 @@
         </div>
     <?php endif; ?>
 <script>
-    
+    function UpdateRoomForm() {
+            const updateRoomForm = document.getElementById("updateRoom-form");
+
+            updateRoomForm.addEventListener("submit", function (event) {
+                event.preventDefault(); // Prevent the default form submission
+
+                const formData = new FormData(updateRoomForm);
+
+                fetch("../php_script/room.php", {
+                    method: "POST",
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Handle the response from the server
+                    if (data.success) {
+                        // Actions to perform on success
+                        alert("Room updated successfully!");
+                        window.location.reload();
+                    } else {
+                        // Actions to perform on failure
+                        alert("Failed to update room:", data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Fetch error:", error);
+                });
+            });
+        }
+
     document.getElementById("postalCode").addEventListener("change", function() {
+        console.log("zipcode");
         var selectedPostalCode = this.value;
         var citySelect = document.getElementById("city");
         citySelect.innerHTML = ""; // Wyczyść pole wyboru miasta
@@ -480,7 +541,36 @@
             });
         }
     }
-
+    function confirmDeviceDelete(device_id, deviceName) {
+            // Wywołaj modal z potwierdzeniem
+            var isConfirmed = confirm("Czy na pewno chcesz usunąć urządzenie '" + deviceName + "'?");
+            console.log(device_id)
+            // Jeśli użytkownik potwierdzi, wykonaj usunięcie
+            if (isConfirmed) {
+                fetch('http://localhost/studia/SMARTHOME/php_script/device.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'method=delete&device_id=' + device_id,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Obsługa odpowiedzi z serwera
+                    console.log(data);
+                    if (data.success) {
+                        alert('Urządzenie usunięte pomyślnie.');
+                        // Tutaj możesz dodać dodatkową logikę, jeśli potrzebujesz
+                        window.location.reload();
+                    } else {
+                        alert('Błąd podczas usuwania urządzenia: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Błąd podczas wysyłania żądania:', error);
+                });
+            }
+        }
     
     var socket = new WebSocket("ws://localhost:8080");
 
@@ -501,38 +591,27 @@
         
         console.log("device_id:", device_id);
         console.log("state:", state);
-        if (state==0){
-            state=1;
-        }
-        else if (state==1){
-            state=0;
-        }
-        
-        togler(device_id,state);
+        toggler(device_id,state);
 
     }
 
     };
-    function togler(device_id,state){
-         // Zaktualizuj stan przycisku na stronie
-        var checkbox = document.getElementById("deviceSwitch_" + device_id); 
-        var statusParagraph = document.getElementById("statusParagraph_" + device_id);
-
-        
-                // Obsługa, gdy przycisk jest zaznaczony (checked)
-        console.log("House.php/togler: Zmiana stanu na",state);
-        
-        statusParagraph.innerHTML = state;
-        checkbox.addEventListener("change", function () {
-            var newState = state;
-            // Aktualizuj tekst paragrafu
-           // statusParagraph.innerHTML = "Stan: " + newState;
-        });
-
-
-
-            console.log('Koniec togler');
-    };
+    function toggler(device_id, newState) {
+            console.log("toggler");
+            console.log("device_id:", device_id);
+            console.log("new state:", newState);
+            const checkbox = document.getElementById("deviceSwitch_" + device_id);
+            if(newState==1){
+                if (checkbox) {
+                    checkbox.checked = newState === 1;
+                }
+            }
+            else{
+                if (checkbox) {
+                    checkbox.checked = newState;
+                }
+            }
+        };
     // Obsługa zdarzenia po rozłączeniu z serwerem WebSocket
     socket.onclose = function (event) {
         if (event.wasClean) {
@@ -559,44 +638,6 @@
         console.log("House.php/229: Wysyłanie danych na serwer");
         console.log('Koniec toggleDevice');
     };
-
-    // Funkcja do pobierania i aktualizacji stanu urządzenia
-    function toggleDeviceState(device_id) {
-        // Wysyłanie zapytania do serwera w celu pobrania stanu urządzenia
-        const rodzaj = "changeDeviceState";
-        const url = `http://localhost/studia/SMARTHOME/php_script/device.php?device_id=${device_id}&method=${rodzaj}`;
-
-        console.log('Tworzony link:', url);
-
-        fetch(url)
-        
-            .then(response => response.json())
-            .then(data => {
-                console.log(data);
-                // Aktualizacja tekstu przycisku i wywołanie funkcji do przełączania stanu
-                const buttonElement = document.getElementById('deviceSwitch_' + device_id);
-                if (buttonElement) {
-                    console.log("House.php/241: Zmiana Stanu");
-                    if (data.state === 0) {
-                        buttonElement.innerHTML = "Off";
-                    } else if (data.state === 1) {
-                        buttonElement.innerHTML = "On";
-                    } else {
-                        console.error("House.php/248: Błędny stan przycisku");
-                    }
-
-                    // Wywołanie funkcji do przełączania stanu z aktualnym stanem
-                    toggleDevice(device_id, data.state);
-                }
-                console.log('deviceSwitch_' + device_id + " " + data.state);
-            })
-            .catch(error => {
-                console.error('Błąd podczas pobierania stanu urządzenia: ' + error.message);
-            });
-            
-
-        console.log('Koniec toggleDeviceState');
-    }
 
     //sterowanie wyskakującego okna dodania urządzenia
     document.addEventListener('DOMContentLoaded', function () {
@@ -726,11 +767,11 @@
                 // Tutaj możesz obsługiwać odpowiedź od serwera
                 console.log(data);
                 if (data.success) {
-                        alert('Pokój usunięty pomyślnie.');
+                        alert('Dom dodany pomyśłini.');
                         // Tutaj możesz dodać dodatkową logikę, jeśli potrzebujesz
                         window.location.reload();
                     } else {
-                        alert('Błąd podczas usuwania pokoju: ' + data.message);
+                        alert('Błąd podczas dodawania domu: ' + data.message);
                     }
             })
             .catch(error => {
@@ -799,15 +840,19 @@
     });
 
     //sterowanie formularza edycji domu
-    function openEditHouseModal($id_house) {
-            // Otwórz modal
-            var editHouseModal = new bootstrap.Modal(document.getElementById('editHouseModal'));
-            editHouseModal.show();
-            
-            // Ustaw wartości pól formularza na aktualne dane
-            document.getElementById('city').value = '<?php echo isset($houseCity) ? $houseCity : ''; ?>';
-            document.getElementById('postalCode').value = '<?php echo isset($zipcode) ? $zipcode : ''; ?>';
-        }
+    function openEditHouseModal(id) {
+        // Otwórz modal
+        var editHouseModal = new bootstrap.Modal(document.getElementById('editHouseModal'));
+        editHouseModal.show();
+
+        // Pobierz dane z atrybutów
+        var city = document.querySelector('[data-city="' + id + '"]').dataset.city;
+        var postalCode = document.querySelector('[data-postal-code="' + id + '"]').dataset.postalCode;
+
+        // Ustaw wartości pól formularza
+        document.getElementById('city').value = city;
+        document.getElementById('postalCode').value = postalCode;
+    }
     function submitInfoHouse() {
         var form = document.getElementById("editHouseForm");
         var formData = new FormData(form);

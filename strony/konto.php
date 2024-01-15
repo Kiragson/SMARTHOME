@@ -16,10 +16,10 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
     // Dane użytkownika zostały znalezione
     $row = $result->fetch_assoc();
-    $imie = $row['first_name'] ?? '---';
-    $nazwisko = $row['last_name'] ?? '---';
-    $email = $row['email'] ?? '---';
-    $telefon = $row['phone_number'] ?? '---';
+    $imie = $row['first_name'];
+    $nazwisko = $row['last_name'] ;
+    $email = $row['email'];
+    $telefon = $row['phone_number'] ;
     $id=$row['id'];
     $ranga= $row['rank'] ??'2';
 }
@@ -46,9 +46,9 @@ $conn->close();
                 <h1>Informacje o koncie</h1>
                 <div class="account-details">
                     <p>Nazwa użytkownika <?php echo $login; ?> #<?php echo $id; ?> </p>
-                    <p>Imię Nazwisko <?php echo $imie; ?> <?php echo $nazwisko; ?></p>
+                    <p>Imię Nazwisko <?php echo isset($imie) ? $imie : 'Brak'; ?><?php echo isset($nazwisko) ? $nazwisko : ' Brak'; ?></p>
                     <p>Adres email <?php echo $email; ?></p>
-                    <p>Nr tel <?php echo $telefon; ?></p>
+                    <p>Nr tel <?php echo isset($telefon) ? $telefon : 'Brak'; ?></p>
                 </div>
 
                 <!-- Przycisk do zmiany danych użytkownika -->
@@ -66,23 +66,23 @@ $conn->close();
             <form id="editForm">
                 <div class="mb-3 row">
                     <label for="username">Nazwa użytkownika:</label>
-                    <input type="text" name="username" id="username" value="<?php echo $login; ?>" readonly>
+                    <input type="text" name="username" id="username" <?php echo isset($login) ? "value='$login'" : "placeholder='Brak'"; ?> readonly>
                 </div>
                 <div class="mb-3 row">
                     <label for="first_name">Imię:</label>
-                    <input type="text" name="first_name" id="first_name" value="<?php echo $imie; ?>">
+                    <input type="text" name="first_name" id="first_name" <?php echo isset($imie) ? "value='$imie'" : "placeholder='Brak'"; ?>>
                 </div>
                 <div class="mb-3 row">
                     <label for="last_name">Nazwisko:</label>
-                    <input type="text" name="last_name" id="last_name" value="<?php echo $nazwisko; ?>">
+                    <input type="text" name="last_name" id="last_name" <?php echo isset($nazwisko) ? "value='$nazwisko'" : "placeholder='Brak'"; ?>>
                 </div>
                 <div class="mb-3 row">
                     <label for="email">Adres email:</label>
-                    <input type="email" name="email" id="email" value="<?php echo $email; ?>" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}">
+                    <input type="email" name="email" id="email" <?php echo isset($email) ? "value='$email'" : "placeholder='Brak'"; ?> pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}" require>
                 </div>
                 <div class="mb-3 row">
                     <label for="phone_number">Nr tel:</label>
-                    <input type="text" name="phone_number" id="phone_number" value="<?php echo $telefon; ?>">
+                    <input type="text" name="phone_number" id="phone_number" <?php echo isset($telefon) ? "value='$telefon'" : "placeholder='Brak'"; ?>>
                 </div>
                 <div class="mb-3 row">
                     <input type="hidden" name="method" value="update">
@@ -115,11 +115,12 @@ $conn->close();
             editForm.addEventListener('submit', function (event) {
                 event.preventDefault();
                 const formData = new FormData(editForm);
-
+                console.log(formData);
                 fetch('http://localhost/studia/SMARTHOME/php_script/user.php', {
                     method: 'POST',
                     body: formData
                 })
+                
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {

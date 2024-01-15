@@ -184,7 +184,10 @@ class DeviceController
 
         return $responseArray;
     }
-
+    public function changeDeviceState($device_id)
+    {
+        
+    }
 
 
     public function getDeviceState($device_id)

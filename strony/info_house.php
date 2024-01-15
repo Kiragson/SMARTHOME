@@ -281,7 +281,7 @@ try {
                     console.log(data);
                     if (data.success) {
                         alert('Pokój usunięty pomyślnie.');
-                        window.location.href = 'strony/house.php';
+                        window.location.href = 'house.php';
                     } else {
                         alert('Błąd podczas usuwania pokoju: ' + data.message);
                     }
